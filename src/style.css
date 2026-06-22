@@ -185,62 +185,40 @@ html, body {
   cursor: not-allowed;
 }
 
-/* ── Toggle Switch ─────────────────────────────────────── */
+/* ── Camera Button ─────────────────────────────────────── */
 
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 32px;
-  height: 18px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  position: absolute;
-}
-
-.toggle-slider {
-  position: absolute;
-  inset: 0;
+.cam-btn {
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
   background: var(--surface-2);
+  color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 9px;
-  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s;
 }
 
-.toggle-slider::after {
-  content: '';
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  left: 2px;
-  bottom: 2px;
-  background: var(--text-muted);
-  border-radius: 50%;
-  transition: transform 0.2s, background 0.2s;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.toggle-switch input:checked + .toggle-slider::after {
-  transform: translateX(14px);
-  background: #fff;
-}
-
-.toggle-switch:hover .toggle-slider {
+.cam-btn:hover {
   border-color: var(--border-hover);
+  background: var(--border-hover);
 }
 
-.toggle-switch input:focus-visible + .toggle-slider {
-  outline: 1px solid var(--accent);
-  outline-offset: 2px;
+.cam-btn.cam-active {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.cam-btn.cam-active:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.cam-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .control-row input[type="file"] {

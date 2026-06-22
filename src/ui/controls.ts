@@ -117,22 +117,11 @@ export function createControlsUI(
 
   // Camera
   const cameraSection = section('Camera')
-  const camToggleRow = document.createElement('div')
-  camToggleRow.className = 'control-row'
-  const camLbl = document.createElement('label')
-  camLbl.textContent = 'Camera'
-  const camToggle = document.createElement('label')
-  camToggle.className = 'toggle-switch'
-  const camChk = document.createElement('input')
-  camChk.type = 'checkbox'
-  camChk.addEventListener('change', () => callbacks.onCameraToggle())
-  const camSlider = document.createElement('span')
-  camSlider.className = 'toggle-slider'
-  camToggle.appendChild(camChk)
-  camToggle.appendChild(camSlider)
-  camToggleRow.appendChild(camLbl)
-  camToggleRow.appendChild(camToggle)
-  cameraSection.appendChild(camToggleRow)
+  const camBtn = document.createElement('button')
+  camBtn.textContent = 'Start Camera'
+  camBtn.className = 'cam-btn'
+  camBtn.addEventListener('click', () => callbacks.onCameraToggle())
+  cameraSection.appendChild(camBtn)
 
   const resRow = document.createElement('div')
   resRow.className = 'control-row'
@@ -276,11 +265,12 @@ export function createControlsUI(
       btns.forEach((b) => (b as HTMLButtonElement).disabled = !enabled)
     },
     setCameraUIEnabled(enabled: boolean) {
-      camChk.disabled = !enabled
+      camBtn.disabled = !enabled
       if (resSel) resSel.disabled = !enabled
     },
     setCameraActive(active: boolean) {
-      camChk.checked = active
+      camBtn.textContent = active ? 'Stop Camera' : 'Start Camera'
+      camBtn.classList.toggle('cam-active', active)
       if (resSel) resSel.disabled = !active
     },
     setCameraResolutions(resolutions: CameraResolution[]) {
