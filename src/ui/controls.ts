@@ -121,11 +121,17 @@ export function createControlsUI(
   camToggleRow.className = 'control-row'
   const camLbl = document.createElement('label')
   camLbl.textContent = 'Camera'
+  const camToggle = document.createElement('label')
+  camToggle.className = 'toggle-switch'
   const camChk = document.createElement('input')
   camChk.type = 'checkbox'
   camChk.addEventListener('change', () => callbacks.onCameraToggle())
+  const camSlider = document.createElement('span')
+  camSlider.className = 'toggle-slider'
+  camToggle.appendChild(camChk)
+  camToggle.appendChild(camSlider)
   camToggleRow.appendChild(camLbl)
-  camToggleRow.appendChild(camChk)
+  camToggleRow.appendChild(camToggle)
   cameraSection.appendChild(camToggleRow)
 
   const resRow = document.createElement('div')
