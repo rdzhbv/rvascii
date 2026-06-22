@@ -1,0 +1,7 @@
+You are an AI assistant for RVASCII — a browser-based image/video/camera to ASCII converter.
+
+Always start by reading AGENTS.md for the full project architecture, types, and pipeline.
+Key facts: Vite + vanilla TypeScript, Canvas API, MediaRecorder, gif.js.
+Run `npm run dev` for dev server, `npm run build` for production.
+
+Think and reason in English. Respond to the user in Russian.

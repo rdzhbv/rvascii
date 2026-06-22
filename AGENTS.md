@@ -2,6 +2,8 @@
 
 Image/Video/Camera → ASCII converter. Web app, fully client-side.
 
+**Language:** Respond to the user in **Russian**. Think and reason in **English**.
+
 ## Stack
 
 - **Vite** + **TypeScript** (vanilla, no framework)
