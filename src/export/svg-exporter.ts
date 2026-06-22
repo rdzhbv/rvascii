@@ -3,9 +3,13 @@ import type { AsciiGrid } from '../types'
 
 let fontPromise: Promise<opentype.Font> | null = null
 
-function getFont(): Promise<opentype.Font> {
+async function getFont(): Promise<opentype.Font> {
   if (!fontPromise) {
-    fontPromise = opentype.load('/jetbrains-mono-latin-400-normal.woff')
+    fontPromise = (async () => {
+      const resp = await fetch('/jetbrains-mono-latin-400-normal.woff')
+      const buf = await resp.arrayBuffer()
+      return opentype.parse(buf)
+    })()
   }
   return fontPromise
 }
