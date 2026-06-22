@@ -6,40 +6,25 @@ export function renderGrid(
   fontSize: number
 ): void {
   const lineHeight = fontSize * 1.2
-  const lines: string[] = []
-  const colors: string[] = []
-
-  for (const row of grid) {
-    let line = ''
-    let colorLine = ''
-    for (const cell of row) {
-      line += cell.char
-      const hex = `#${cell.r.toString(16).padStart(2, '0')}${cell.g.toString(16).padStart(2, '0')}${cell.b.toString(16).padStart(2, '0')}`
-      colorLine += hex + ','
-    }
-    lines.push(line)
-    colors.push(colorLine)
-  }
 
   container.style.fontSize = `${fontSize}px`
   container.style.lineHeight = `${lineHeight}px`
-  container.innerHTML = ''
+  container.textContent = ''
 
-  for (let i = 0; i < lines.length; i++) {
+  for (const row of grid) {
     const rowEl = document.createElement('div')
     rowEl.style.whiteSpace = 'pre'
     rowEl.style.fontFamily = 'monospace'
     rowEl.style.letterSpacing = '0px'
     rowEl.style.height = `${lineHeight}px`
 
-    const colorList = colors[i].split(',')
-    const line = lines[i]
-    let html = ''
-    for (let c = 0; c < line.length; c++) {
-      const color = colorList[c] || '#ffffff'
-      html += `<span style="color:${color}">${line[c] === ' ' ? '&nbsp;' : line[c]}</span>`
+    for (const cell of row) {
+      const span = document.createElement('span')
+      const hex = `#${cell.r.toString(16).padStart(2, '0')}${cell.g.toString(16).padStart(2, '0')}${cell.b.toString(16).padStart(2, '0')}`
+      span.style.color = hex
+      span.textContent = cell.char === ' ' ? '\u00A0' : cell.char
+      rowEl.appendChild(span)
     }
-    rowEl.innerHTML = html
     container.appendChild(rowEl)
   }
 }

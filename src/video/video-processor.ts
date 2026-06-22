@@ -173,5 +173,9 @@ export class VideoProcessor {
     this.pause()
     this.video = null
     this.onFrame = null
+    if (this.sourceUrl) {
+      URL.revokeObjectURL(this.sourceUrl)
+      this.sourceUrl = null
+    }
   }
 }
