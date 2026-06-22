@@ -46,31 +46,45 @@ export interface CharsetEntry {
   id: string
   name: string
   chars: string
+  category: string
 }
 
 export const CHARSET_PRESETS: CharsetEntry[] = [
-  { id: 'classic',    name: 'Classic',            chars: '@%#*+=-:. ' },
-  { id: 'extended',   name: 'Extended',           chars: '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. ' },
-  { id: 'dense',      name: 'Dense',              chars: ' .:;+=xX$#@█' },
-  { id: 'minimal',    name: 'Minimal',            chars: ' .:-=+#@' },
-  { id: 'binary',     name: 'Binary  ',            chars: ' █' },
-  { id: 'blocks',     name: 'Blocks',             chars: ' ░▒▓█▄▀▐▌' },
-  { id: 'blocks-ext', name: 'Blocks Extended',    chars: ' ▖▗▘▙▚▛▜▝▞▟░▒▓█' },
-  { id: 'gradient',   name: 'Gradient',           chars: ' ░▒▓█' },
-  { id: 'shade',      name: 'Shade',              chars: ' ░▒▓█▇▆▅▄▃▂▁' },
-  { id: 'dots',       name: 'Dots',               chars: ' ⋅∘∙●◉◎◆✦★' },
-  { id: 'stars',      name: 'Stars',              chars: ' ·✧✦✩✨★✶✳✸' },
-  { id: 'braille',    name: 'Braille',            chars: ' ⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠿' },
-  { id: 'katakana',   name: 'Katakana',           chars: ' ｡｢｣､･ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃ' },
-  { id: 'greek',      name: 'Greek',              chars: ' αβγδεζηθικλμνξπρστφχψω' },
-  { id: 'runes',      name: 'Runes',              chars: ' ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛝᛟᛞᛡᛣ' },
-  { id: 'box',        name: 'Box Drawing',        chars: ' ─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬' },
-  { id: 'math',       name: 'Math Symbols',       chars: ' ·∘∙°±×÷≈≠≡≤≥∞∫∑√∏∂∆Ω' },
-  { id: 'circtuit',   name: 'Circuit',            chars: ' .·─│┌┐└┘┼○●□■△▲≡' },
-  { id: 'music',      name: 'Music',              chars: ' ♪♫♬♩♭♮♯○●' },
-  { id: 'arrows',     name: 'Arrows',             chars: ' ←↑→↓↔↕↖↗↘↙↩↪↻➡' },
-  { id: 'halffill',   name: 'Half Fill',          chars: ' ◔◑◕◐◒◓◖◗◙' },
-  { id: 'hatch',      name: 'Crosshatch',         chars: ' ▣▤▥▦▧▨▩' },
+  // ── Standard ──
+  { id: 'classic',     name: 'Classic',          category: 'Standard',  chars: '@%#*+=-:. ' },
+  { id: 'extended',    name: 'Extended',         category: 'Standard',  chars: '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. ' },
+  { id: 'ultra-dense', name: 'Ultra Dense',      category: 'Standard',  chars: ' .\'`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$' },
+  { id: 'dense',       name: 'Dense',            category: 'Standard',  chars: ' .:;+=xX$#@█' },
+  { id: 'minimal',     name: 'Minimal',          category: 'Standard',  chars: ' .:-=+#@' },
+  { id: 'binary',      name: 'Binary',           category: 'Standard',  chars: ' █' },
+
+  // ── Blocks ──
+  { id: 'blocks',       name: 'Blocks',          category: 'Blocks',    chars: ' ░▒▓█▄▀▐▌' },
+  { id: 'blocks-ext',   name: 'Blocks Extended', category: 'Blocks',    chars: ' ▖▗▘▙▚▛▜▝▞▟░▒▓█' },
+  { id: 'blocks-fill',  name: 'Blocks Fill',     category: 'Blocks',    chars: ' ▏▎▍▌▋▊▉█' },
+  { id: 'blocks-vfill', name: 'Blocks V-Fill',   category: 'Blocks',    chars: ' ▁▂▃▄▅▆▇█' },
+  { id: 'quadrant',     name: 'Quadrant',        category: 'Blocks',    chars: ' ▘▝▗▖▄▀▐▌▚▞▙▟█' },
+  { id: 'gradient',     name: 'Gradient',        category: 'Blocks',    chars: ' ░▒▓█' },
+  { id: 'shade',        name: 'Shade',           category: 'Blocks',    chars: ' ░▒▓█▇▆▅▄▃▂▁' },
+
+  // ── Symbols ──
+  { id: 'box',        name: 'Box Drawing',      category: 'Symbols',   chars: ' ─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬' },
+  { id: 'math',       name: 'Math Symbols',     category: 'Symbols',   chars: ' ·∘∙°±×÷≈≠≡≤≥∞∫∑√∏∂∆Ω' },
+  { id: 'circtuit',   name: 'Circuit',          category: 'Symbols',   chars: ' .·─│┌┐└┘┼○●□■△▲≡' },
+  { id: 'music',      name: 'Music',            category: 'Symbols',   chars: ' ♪♫♬♩♭♮♯○●' },
+  { id: 'arrows',     name: 'Arrows',           category: 'Symbols',   chars: ' ←↑→↓↔↕↖↗↘↙↩↪↻➡' },
+
+  // ── Dots ──
+  { id: 'dots',      name: 'Dots',             category: 'Dots',     chars: ' ⋅∘∙●◉◎◆✦★' },
+  { id: 'stars',     name: 'Stars',            category: 'Dots',     chars: ' ·✧✦✩✨★✶✳✸' },
+  { id: 'braille',   name: 'Braille',          category: 'Dots',     chars: ' ⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠿' },
+  { id: 'halffill',  name: 'Half Fill',        category: 'Dots',     chars: ' ◔◑◕◐◒◓◖◗◙' },
+  { id: 'hatch',     name: 'Crosshatch',       category: 'Dots',     chars: ' ▣▤▥▦▧▨▩' },
+
+  // ── Scripts ──
+  { id: 'katakana',  name: 'Katakana',         category: 'Scripts',  chars: ' ｡｢｣､･ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃ' },
+  { id: 'greek',     name: 'Greek',            category: 'Scripts',  chars: ' αβγδεζηθικλμνξπρστφχψω' },
+  { id: 'runes',     name: 'Runes',            category: 'Scripts',  chars: ' ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛝᛟᛞᛡᛣ' },
 ]
 
 export const CHARSET_MAP: Record<string, string> = {}

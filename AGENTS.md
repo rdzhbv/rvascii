@@ -65,7 +65,7 @@ ColorFilterEntry { id, name, type: 'source'|'palette'|'monochrome'|'invert', col
 
 ### Presets
 
-- **CHARSET_PRESETS**: 23 entries (classic, extended, dense, binary, blocks, braille, katakana, runes, greek, etc.)
+- **CHARSET_PRESETS**: 27 entries across 5 categories (Standard, Blocks, Symbols, Dots, Scripts)
 - **COLOR_FILTERS**: 16 entries (original, invert, neon, cyberpunk, vaporwave, fire, ice, forest, sepia, etc.)
 - **CAMERA_PRESETS**: 4 entries (1920×1080, 1280×720, 640×480, 320×240)
 

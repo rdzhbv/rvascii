@@ -147,12 +147,34 @@ export function createControlsUI(
 
   // Charset
   const charSection = section('Characters')
-  const charsetPresets = CHARSET_PRESETS.map((p) => ({
-    value: p.id,
-    text: `${p.name} (${p.chars.length} chars)`,
-  }))
-  charsetPresets.push({ value: 'custom', text: 'Custom...' })
-  select('Preset', charsetPresets, config.charsetId, (v) => {
+  const charRow = document.createElement('div')
+  charRow.className = 'control-row'
+  const charLbl = document.createElement('label')
+  charLbl.textContent = 'Preset'
+  const charSel = document.createElement('select')
+  charSel.id = 'charset'
+
+  const categories = [...new Set(CHARSET_PRESETS.map((p) => p.category))]
+  for (const cat of categories) {
+    const group = document.createElement('optgroup')
+    group.label = cat
+    const presets = CHARSET_PRESETS.filter((p) => p.category === cat)
+    for (const p of presets) {
+      const opt = document.createElement('option')
+      opt.value = p.id
+      opt.textContent = `${p.name} (${p.chars.length} chars)`
+      if (p.id === config.charsetId) opt.selected = true
+      group.appendChild(opt)
+    }
+    charSel.appendChild(group)
+  }
+  const customOpt = document.createElement('option')
+  customOpt.value = 'custom'
+  customOpt.textContent = 'Custom...'
+  charSel.appendChild(customOpt)
+
+  charSel.addEventListener('change', () => {
+    const v = charSel.value
     if (v === 'custom') {
       const c = prompt('Enter custom characters (bright to dim):', config.charset)
       if (c) callbacks.onConfigChange({ charset: c, charsetId: 'custom' })
@@ -161,6 +183,9 @@ export function createControlsUI(
       if (entry) callbacks.onConfigChange({ charset: entry.chars, charsetId: v })
     }
   })
+  charRow.appendChild(charLbl)
+  charRow.appendChild(charSel)
+  charSection.appendChild(charRow)
 
   // Settings
   const settingsSection = section('Settings')
@@ -173,32 +198,44 @@ export function createControlsUI(
 
   // Color Filter
   const colorSection = section('Color Filter')
-  const colorOpts = COLOR_FILTERS.map((f) => ({
-    value: f.id,
-    text: f.name,
-  }))
-  const colorFilterRow = document.createElement('div')
-  colorFilterRow.className = 'control-row'
-  const colorFilterLbl = document.createElement('label')
-  colorFilterLbl.textContent = 'Filter'
-  const colorFilterSel = document.createElement('select')
-  colorFilterSel.id = 'color-filter'
-  for (const opt of colorOpts) {
-    const el = document.createElement('option')
-    el.value = opt.value
-    el.textContent = opt.text
-    if (opt.value === config.colorFilterId) el.selected = true
-    colorFilterSel.appendChild(el)
+  const filterTypes: Record<string, string> = {
+    source: 'Original',
+    invert: 'Invert',
+    monochrome: 'Monochrome',
+    palette: 'Palettes',
   }
-  colorFilterSel.addEventListener('change', () => {
-    callbacks.onConfigChange({ colorFilterId: colorFilterSel.value })
+  const filterRow = document.createElement('div')
+  filterRow.className = 'control-row'
+  const filterLbl = document.createElement('label')
+  filterLbl.textContent = 'Filter'
+  const filterSel = document.createElement('select')
+  filterSel.id = 'color-filter'
+
+  const filterTypeOrder = ['source', 'invert', 'monochrome', 'palette']
+  for (const type of filterTypeOrder) {
+    const filters = COLOR_FILTERS.filter((f) => f.type === type)
+    if (filters.length === 0) continue
+    const group = document.createElement('optgroup')
+    group.label = filterTypes[type] || type
+    for (const f of filters) {
+      const opt = document.createElement('option')
+      opt.value = f.id
+      opt.textContent = f.name
+      if (f.id === config.colorFilterId) opt.selected = true
+      group.appendChild(opt)
+    }
+    filterSel.appendChild(group)
+  }
+
+  filterSel.addEventListener('change', () => {
+    callbacks.onConfigChange({ colorFilterId: filterSel.value })
   })
-  colorFilterRow.appendChild(colorFilterLbl)
-  colorFilterRow.appendChild(colorFilterSel)
-  colorSection.appendChild(colorFilterRow)
+  filterRow.appendChild(filterLbl)
+  filterRow.appendChild(filterSel)
+  colorSection.appendChild(filterRow)
 
   function updateColorFilterDisabled() {
-    colorFilterSel.disabled = !config.colorEnabled
+    filterSel.disabled = !config.colorEnabled
   }
   updateColorFilterDisabled()
 
@@ -220,10 +257,13 @@ export function createControlsUI(
   return {
     updateConfig(newConfig: AsciiConfig) {
       config = newConfig
-      colorFilterSel.disabled = !config.colorEnabled
-      // Update filter selection
-      const filterIdx = colorOpts.findIndex((o) => o.value === config.colorFilterId)
-      if (filterIdx >= 0) colorFilterSel.selectedIndex = filterIdx
+      filterSel.disabled = !config.colorEnabled
+      for (let i = 0; i < filterSel.options.length; i++) {
+        if (filterSel.options[i].value === config.colorFilterId) {
+          filterSel.selectedIndex = i
+          break
+        }
+      }
     },
     setExportEnabled(enabled: boolean) {
       const btns = container.querySelectorAll('.export-btn')
