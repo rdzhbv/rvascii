@@ -49,12 +49,27 @@ html, body {
 
 .sidebar {
   width: 248px;
-  min-width: 248px;
+  min-width: 180px;
+  max-width: 480px;
   background: var(--surface);
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.resize-handle {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  position: relative;
+  z-index: 10;
+}
+
+.resize-handle:hover,
+.resize-handle:active {
+  background: var(--accent);
 }
 
 .logo {

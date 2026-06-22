@@ -189,10 +189,10 @@ export function createControlsUI(
 
   // Settings
   const settingsSection = section('Settings')
-  slider('Density', 0.25, 2, 0.25, config.density, (v) => callbacks.onConfigChange({ density: v }))
-  slider('Contrast', 0, 2, 0.1, config.contrast, (v) => callbacks.onConfigChange({ contrast: v }))
-  slider('Brightness', 0.1, 2, 0.1, config.brightness, (v) => callbacks.onConfigChange({ brightness: v }))
-  slider('Font Scale', 0.5, 3, 0.25, config.fontScale, (v) => callbacks.onConfigChange({ fontScale: v }))
+  slider('Density', 0.25, 2, 0.05, config.density, (v) => callbacks.onConfigChange({ density: v }))
+  slider('Contrast', 0, 2, 0.05, config.contrast, (v) => callbacks.onConfigChange({ contrast: v }))
+  slider('Brightness', 0.1, 2, 0.05, config.brightness, (v) => callbacks.onConfigChange({ brightness: v }))
+  slider('Font Scale', 0.5, 3, 0.05, config.fontScale, (v) => callbacks.onConfigChange({ fontScale: v }))
   toggle('Invert', config.invert, (v) => callbacks.onConfigChange({ invert: v }))
   toggle('Color', config.colorEnabled, (v) => callbacks.onConfigChange({ colorEnabled: v }))
 

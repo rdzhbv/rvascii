@@ -31,10 +31,11 @@ class App {
     const app = document.getElementById('app')!
     app.innerHTML = `
       <div class="app-layout">
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
           <div class="logo">RVASCII</div>
           <div class="controls" id="controls"></div>
         </div>
+        <div class="resize-handle" id="resize-handle"></div>
         <div class="main-area">
           <div class="preview" id="preview"></div>
           <div class="video-player" id="video-player"></div>
@@ -42,6 +43,8 @@ class App {
         </div>
       </div>
     `
+
+    this.initResizableSidebar()
 
     this.previewEl = document.getElementById('preview')!
     this.controlsEl = document.getElementById('controls')!
@@ -68,6 +71,35 @@ class App {
 
   private setStatus(msg: string): void {
     this.statusEl.textContent = msg
+  }
+
+  private initResizableSidebar(): void {
+    const sidebar = document.getElementById('sidebar')!
+    const handle = document.getElementById('resize-handle')!
+    let isDragging = false
+
+    const onMove = (e: MouseEvent) => {
+      if (!isDragging) return
+      const w = Math.max(180, Math.min(480, e.clientX))
+      sidebar.style.width = w + 'px'
+    }
+
+    const onUp = () => {
+      isDragging = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault()
+      isDragging = true
+      document.body.style.cursor = 'col-resize'
+      document.body.style.userSelect = 'none'
+      document.addEventListener('mousemove', onMove)
+      document.addEventListener('mouseup', onUp)
+    })
   }
 
   private handleFile(file: File): void {
