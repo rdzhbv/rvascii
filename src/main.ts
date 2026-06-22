@@ -378,7 +378,7 @@ class App {
           blob = await exportPNG(this.currentGrid, fontSize)
           break
         case 'svg':
-          blob = exportSVG(this.currentGrid, fontSize)
+          blob = await exportSVG(this.currentGrid, fontSize)
           break
         case 'jpg':
           blob = await exportJPG(this.currentGrid, fontSize)

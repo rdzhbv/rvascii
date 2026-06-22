@@ -1,6 +1,17 @@
+import * as opentype from 'opentype.js'
 import type { AsciiGrid } from '../types'
 
-export function exportSVG(grid: AsciiGrid, fontSize: number): Blob {
+let fontPromise: Promise<opentype.Font> | null = null
+
+function getFont(): Promise<opentype.Font> {
+  if (!fontPromise) {
+    fontPromise = opentype.load('/jetbrains-mono-latin-400-normal.woff')
+  }
+  return fontPromise
+}
+
+export async function exportSVG(grid: AsciiGrid, fontSize: number): Promise<Blob> {
+  const font = await getFont()
   const cols = grid[0]?.length || 1
   const rows = grid.length
   const charW = fontSize * 0.6
@@ -8,23 +19,28 @@ export function exportSVG(grid: AsciiGrid, fontSize: number): Blob {
   const w = Math.round(cols * charW)
   const h = Math.round(rows * charH)
 
-  let textElements = ''
+  const cells: { path: string; color: string }[] = []
+  const seen: Set<string> = new Set()
+
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const cell = grid[r][c]
-      if (cell.char !== ' ') {
-        const x = c * charW
-        const y = r * charH + fontSize * 0.85
-        const color = `rgb(${cell.r},${cell.g},${cell.b})`
-        const escaped = cell.char === '&' ? '&amp;' : cell.char === '<' ? '&lt;' : cell.char === '>' ? '&gt;' : cell.char === '"' ? '&quot;' : cell.char
-        textElements += `<text x="${x}" y="${y}" fill="${color}" font-family="monospace" font-size="${fontSize}">${escaped}</text>\n`
-      }
+      if (cell.char === ' ') continue
+      const x = c * charW
+      const y = r * charH
+      const color = `rgb(${cell.r},${cell.g},${cell.b})`
+      const path = font.getPath(cell.char, x, y + fontSize * 0.85, fontSize)
+      cells.push({ path: path.toSVG(), color })
     }
   }
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <rect width="${w}" height="${h}" fill="#000"/>
-  ${textElements}</svg>`
+`
+  for (const { path, color } of cells) {
+    svg += `  <path d="${path}" fill="${color}"/>\n`
+  }
+  svg += '</svg>'
 
   return new Blob([svg], { type: 'image/svg+xml' })
 }

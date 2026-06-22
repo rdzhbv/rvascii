@@ -36,7 +36,7 @@ src/
 │   └── camera-controller.ts# CameraController — webcam management
 ├── export/
 │   ├── png-exporter.ts     # exportPNG(grid, fontSize) → Blob
-│   ├── svg-exporter.ts     # exportSVG(grid, fontSize) → Blob (SVG text elements)
+│   ├── svg-exporter.ts     # exportSVG(grid, fontSize) → Blob (SVG paths via opentype.js — flattened curves)
 │   ├── jpg-exporter.ts     # exportJPG(grid, fontSize) → Blob
 │   ├── gif-exporter.ts     # exportGIF(frames[], fontSize, delay) → Blob
 │   └── mp4-exporter.ts     # exportMP4(sourceUrl, config, ...) → Blob (real-time recording with audio)
@@ -106,7 +106,7 @@ Upload (image/video) or Camera
 |--------|--------|-------|
 | PNG | Canvas `toBlob()` | Renders text monospace on canvas |
 | JPG | Canvas `toBlob('image/jpeg')` | Same as PNG, JPEG compression |
-| SVG | DOM-generated `<svg>` with `<text>` elements | Vector output |
+| SVG | `opentype.js` — text → SVG `<path>` elements | Vector shapes, editable in Figma as curves |
 | GIF | gif.js library | Frames pre-extracted then encoded |
 | MP4 | Real-time `canvas.captureStream()` + `MediaRecorder` | Captures ASCII frames + original audio simultaneously |
 

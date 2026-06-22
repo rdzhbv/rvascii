@@ -6,6 +6,22 @@ interface HTMLCanvasElement {
   captureStream(fps?: number): MediaStream
 }
 
+declare module 'opentype.js' {
+  interface Path {
+    toSVG(decimalPlaces?: number): string
+    toPathData(decimalPlaces?: number): string
+  }
+
+  interface Font {
+    getPath(text: string, x: number, y: number, fontSize: number): Path
+    getAdvanceWidth(text: string, fontSize: number): number
+    unitsPerEm: number
+  }
+
+  export function load(url: string): Promise<Font>
+  export function parse(buffer: ArrayBuffer): Font
+}
+
 declare module 'gif.js' {
   interface GIFOptions {
     workers?: number
