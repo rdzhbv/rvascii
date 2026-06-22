@@ -24,7 +24,6 @@ export async function exportSVG(grid: AsciiGrid, fontSize: number): Promise<Blob
   const h = Math.round(rows * charH)
 
   const cells: { path: string; color: string }[] = []
-  const seen: Set<string> = new Set()
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -34,7 +33,7 @@ export async function exportSVG(grid: AsciiGrid, fontSize: number): Promise<Blob
       const y = r * charH
       const color = `rgb(${cell.r},${cell.g},${cell.b})`
       const path = font.getPath(cell.char, x, y + fontSize * 0.85, fontSize)
-      cells.push({ path: path.toSVG(), color })
+      cells.push({ path: path.toPathData(), color })
     }
   }
 
