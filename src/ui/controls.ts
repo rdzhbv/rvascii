@@ -7,6 +7,7 @@ export interface ControlsCallbacks {
   onExport: (format: ExportFormat) => void
   onCameraToggle: () => void
   onCameraResolutionChange: (res: CameraResolution) => void
+  onClear: () => void
 }
 
 export interface ControlsAPI {
@@ -182,6 +183,12 @@ export function createControlsUI(
   fileLabel.appendChild(fileInput)
   fileArea.appendChild(fileLabel)
   fileSection.appendChild(fileArea)
+
+  const clearBtn = document.createElement('button')
+  clearBtn.className = 'control-clear-btn'
+  clearBtn.textContent = 'Clear'
+  clearBtn.addEventListener('click', () => callbacks.onClear())
+  fileSection.appendChild(clearBtn)
 
   // ═══════════════════════════════════════════════════════════
   // 2. CAMERA

@@ -61,6 +61,7 @@ class App {
       onExport: (format) => this.handleExport(format),
       onCameraToggle: () => this.toggleCamera(),
       onCameraResolutionChange: (res) => this.changeCameraResolution(res),
+      onClear: () => this.handleClear(),
     })
 
     const playerCallbacks: VideoPlayerCallbacks = {
@@ -305,6 +306,29 @@ class App {
       clearPreview(this.previewEl)
       this.setStatus('Drop an image or video to begin')
     }
+  }
+
+  private handleClear(): void {
+    this.stopCamera()
+    if (this.videoProcessor) {
+      this.videoProcessor.destroy()
+      this.videoProcessor = null
+    }
+    this.videoPlayer?.hide()
+    this.currentFile = null
+    this.currentGrid = null
+    this.lastImageData = null
+    this.isVideoMode = false
+    this.isCameraMode = false
+    this.controls?.setExportEnabled(false)
+    clearPreview(this.previewEl)
+    this.setStatus('Drop an image or video to begin')
+
+    // Reset file input display
+    const textEl = document.querySelector<HTMLElement>('.file-drop-area .file-text')
+    if (textEl) textEl.textContent = 'Drop image or video here'
+    const fileInput = document.querySelector<HTMLInputElement>('.file-drop-area input[type="file"]')
+    if (fileInput) fileInput.value = ''
   }
 
   private async changeCameraResolution(res: CameraResolution): Promise<void> {
