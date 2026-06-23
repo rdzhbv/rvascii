@@ -75,10 +75,10 @@ export const EFFECT_REGISTRY: Record<EffectType, RegisteredEffect> = {
     definition: {
       id: 'halftone',
       name: 'Halftone',
-      description: 'Offset printing dot pattern simulation',
-      renderMode: 'text',
+      description: 'AM halftone screen — variable dot size, shape, and angle for retro print aesthetics',
+      renderMode: 'block',
       hasCharset: false,
-      hasInvert: false,
+      hasInvert: true,
     },
     process: processHalftone,
   },

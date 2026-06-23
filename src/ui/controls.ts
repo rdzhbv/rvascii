@@ -393,6 +393,31 @@ export function createControlsUI(
   }
 
   // ═══════════════════════════════════════════════════════════
+  // HALFTONE-SPECIFIC CONTROLS
+  // ═══════════════════════════════════════════════════════════
+  const htFreqRow = slider('Frequency', 1, 12, 1, config.halftoneFrequency, (v) => callbacks.onConfigChange({ halftoneFrequency: v }))
+  const htShapeRow = selectControl('Dot Shape', [
+    { value: 'round', text: 'Round' },
+    { value: 'elliptical', text: 'Elliptical' },
+    { value: 'square', text: 'Square' },
+    { value: 'diamond', text: 'Diamond' },
+    { value: 'line-horizontal', text: 'Line Horizontal' },
+    { value: 'line-vertical', text: 'Line Vertical' },
+  ], config.halftoneShape, (v) => callbacks.onConfigChange({ halftoneShape: v as typeof config.halftoneShape }))
+  const htAngleRow = slider('Screen Angle', 0, 180, 1, config.halftoneAngle, (v) => callbacks.onConfigChange({ halftoneAngle: v }))
+  const htColorModeRow = selectControl('Color Mode', [
+    { value: 'bw', text: '1-bit B&W' },
+    { value: 'color', text: 'Color Halftone' },
+    { value: 'duotone', text: 'Duotone' },
+  ], config.halftoneColorMode, (v) => callbacks.onConfigChange({ halftoneColorMode: v as typeof config.halftoneColorMode }))
+
+  // Register halftone controls
+  allControlRows['ht-freq'] = htFreqRow
+  allControlRows['ht-shape'] = htShapeRow
+  allControlRows['ht-angle'] = htAngleRow
+  allControlRows['ht-color'] = htColorModeRow
+
+  // ═══════════════════════════════════════════════════════════
   // BITMAP-SPECIFIC CONTROLS
   // ═══════════════════════════════════════════════════════════
   const bitmapDitherRow = selectControl('Dither', [
@@ -433,7 +458,7 @@ export function createControlsUI(
     'edge-detect':   ['edge-threshold', 'font-scale'],
     'silhouette':    ['threshold'],
     'dither':        ['algorithm'],
-    'halftone':      ['dot-size', 'font-scale'],
+    'halftone':      ['ht-freq', 'ht-shape', 'ht-angle', 'ht-color', 'invert', 'font-scale'],
     'wave':          ['amplitude', 'frequency'],
     'oil-paint':     ['radius'],
   }

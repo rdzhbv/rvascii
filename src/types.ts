@@ -17,6 +17,10 @@ export interface EffectDefinition {
   hasInvert: boolean
 }
 
+export type HalftoneShape = 'round' | 'elliptical' | 'square' | 'diamond' | 'line-horizontal' | 'line-vertical'
+
+export type HalftoneColorMode = 'bw' | 'color' | 'duotone'
+
 export type BitmapDitherMode =
   | 'none'
   | 'floyd-steinberg'
@@ -59,6 +63,13 @@ export interface AsciiConfig {
   bitmapPatternScale: number
   bitmapThreshold: number
   bitmapColorMode: 'bw' | 'color'
+  // Halftone-specific (professional AM halftone)
+  halftoneFrequency: number
+  halftoneShape: HalftoneShape
+  halftoneAngle: number
+  halftoneColorMode: HalftoneColorMode
+  halftoneDotColor: string  // hex color for duotone mode
+  halftoneBgColor: string   // hex color for background
 }
 
 export interface AsciiCell {
@@ -193,4 +204,10 @@ export const DEFAULT_CONFIG: AsciiConfig = {
   bitmapPatternScale: 1,
   bitmapThreshold: 128,
   bitmapColorMode: 'bw',
+  halftoneFrequency: 4,
+  halftoneShape: 'round',
+  halftoneAngle: 45,
+  halftoneColorMode: 'bw',
+  halftoneDotColor: '#000000',
+  halftoneBgColor: '#ffffff',
 }
