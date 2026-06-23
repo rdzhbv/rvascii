@@ -17,6 +17,24 @@ export interface EffectDefinition {
   hasInvert: boolean
 }
 
+export type BitmapDitherMode =
+  | 'none'
+  | 'floyd-steinberg'
+  | 'atkinson'
+  | 'stucki'
+  | 'jarvis'
+  | 'sierra'
+  | 'sierra-lite'
+  | 'burkes'
+  | 'bayer-2x2'
+  | 'bayer-4x4'
+  | 'bayer-8x8'
+  | 'halftone'
+  | 'line-horizontal'
+  | 'line-vertical'
+  | 'crosshatch'
+  | 'random'
+
 export interface AsciiConfig {
   effect: EffectType
   charset: string
@@ -36,6 +54,11 @@ export interface AsciiConfig {
   waveAmplitude: number
   waveFrequency: number
   oilPaintRadius: number
+  // Bitmap-specific (professional 1-bit)
+  bitmapDither: BitmapDitherMode
+  bitmapPatternScale: number
+  bitmapThreshold: number
+  bitmapColorMode: 'bw' | 'color'
 }
 
 export interface AsciiCell {
@@ -166,4 +189,8 @@ export const DEFAULT_CONFIG: AsciiConfig = {
   waveAmplitude: 0.05,
   waveFrequency: 3,
   oilPaintRadius: 3,
+  bitmapDither: 'floyd-steinberg',
+  bitmapPatternScale: 1,
+  bitmapThreshold: 128,
+  bitmapColorMode: 'bw',
 }

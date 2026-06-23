@@ -392,9 +392,44 @@ export function createControlsUI(
     'radius': oilRadiusRow,
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // BITMAP-SPECIFIC CONTROLS
+  // ═══════════════════════════════════════════════════════════
+  const bitmapDitherRow = selectControl('Dither', [
+    { value: 'none', text: 'None (Threshold)' },
+    { value: 'floyd-steinberg', text: 'Floyd-Steinberg' },
+    { value: 'atkinson', text: 'Atkinson' },
+    { value: 'stucki', text: 'Stucki' },
+    { value: 'jarvis', text: 'Jarvis' },
+    { value: 'sierra', text: 'Sierra' },
+    { value: 'sierra-lite', text: 'Sierra Lite' },
+    { value: 'burkes', text: 'Burkes' },
+    { value: 'bayer-2x2', text: 'Bayer 2×2' },
+    { value: 'bayer-4x4', text: 'Bayer 4×4' },
+    { value: 'bayer-8x8', text: 'Bayer 8×8' },
+    { value: 'halftone', text: 'Halftone Dots' },
+    { value: 'line-horizontal', text: 'Line Horizontal' },
+    { value: 'line-vertical', text: 'Line Vertical' },
+    { value: 'crosshatch', text: 'Crosshatch' },
+    { value: 'random', text: 'Random' },
+  ], config.bitmapDither as string, (v) => callbacks.onConfigChange({ bitmapDither: v as typeof config.bitmapDither }))
+
+  const bitmapScaleRow = slider('Pattern Scale', 0.5, 4, 0.25, config.bitmapPatternScale, (v) => callbacks.onConfigChange({ bitmapPatternScale: v }))
+  const bitmapThresholdRow = slider('Threshold', 1, 255, 1, config.bitmapThreshold, (v) => callbacks.onConfigChange({ bitmapThreshold: v }))
+  const bitmapColorRow = selectControl('Color Mode', [
+    { value: 'bw', text: '1-bit B&W' },
+    { value: 'color', text: 'Color Dither' },
+  ], config.bitmapColorMode, (v) => callbacks.onConfigChange({ bitmapColorMode: v as 'bw' | 'color' }))
+
+  // Add bitmap rows to allControlRows
+  allControlRows['bitmap-dither'] = bitmapDitherRow
+  allControlRows['bitmap-scale'] = bitmapScaleRow
+  allControlRows['bitmap-threshold'] = bitmapThresholdRow
+  allControlRows['bitmap-color'] = bitmapColorRow
+
   const effectControlMap: Record<EffectType, string[]> = {
     'ascii':         ['charset', 'invert', 'font-scale'],
-    'bitmap':        ['font-scale'],  // shows as "Block Size"
+    'bitmap':        ['bitmap-dither', 'bitmap-scale', 'bitmap-threshold', 'bitmap-color', 'invert', 'font-scale'],
     'edge-detect':   ['edge-threshold', 'font-scale'],
     'silhouette':    ['threshold'],
     'dither':        ['algorithm'],

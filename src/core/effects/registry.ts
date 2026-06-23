@@ -31,10 +31,10 @@ export const EFFECT_REGISTRY: Record<EffectType, RegisteredEffect> = {
     definition: {
       id: 'bitmap',
       name: 'Bitmap',
-      description: 'Colored pixel blocks — mosaic effect',
+      description: '1-bit black & white dithering — 16 dither modes for retro pixel aesthetics',
       renderMode: 'block',
       hasCharset: false,
-      hasInvert: false,
+      hasInvert: true,
     },
     process: convertToBitmap,
   },
