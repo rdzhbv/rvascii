@@ -23,8 +23,7 @@ export async function exportSVG(grid: AsciiGrid, fontSize: number): Promise<Blob
   const w = Math.round(cols * charW)
   const h = Math.round(rows * charH)
 
-  const cells: { path: string; color: string }[] = []
-
+  let paths = ''
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const cell = grid[r][c]
@@ -32,18 +31,17 @@ export async function exportSVG(grid: AsciiGrid, fontSize: number): Promise<Blob
       const x = c * charW
       const y = r * charH
       const color = `rgb(${cell.r},${cell.g},${cell.b})`
-      const path = font.getPath(cell.char, x, y + fontSize * 0.85, fontSize)
-      cells.push({ path: path.toPathData(), color })
+      // Font uses Y-up; SVG uses Y-down → negate Y, flip with transform
+      const path = font.getPath(cell.char, x, -(y + fontSize * 0.85), fontSize)
+      paths += `  <path d="${path.toPathData()}" fill="${color}"/>\n`
     }
   }
 
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <rect width="${w}" height="${h}" fill="#000"/>
-`
-  for (const { path, color } of cells) {
-    svg += `  <path d="${path}" fill="${color}"/>\n`
-  }
-  svg += '</svg>'
+  <g transform="scale(1, -1)">
+${paths}  </g>
+</svg>`
 
   return new Blob([svg], { type: 'image/svg+xml' })
 }
