@@ -215,8 +215,8 @@ class App {
 
       this.controls?.setExportEnabled(true)
       this.setStatus('Video loaded — use player controls')
-    }).catch(() => {
-      this.setStatus('Failed to load video')
+    }).catch((err: unknown) => {
+      this.setStatus(err instanceof Error ? err.message : 'Failed to load video')
     })
   }
 

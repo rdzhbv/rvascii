@@ -36,17 +36,28 @@ export class VideoProcessor {
       this.video = document.createElement('video')
       this.video.muted = true
       this.video.playsInline = true
-      this.video.loop = true
+      const ext = file.name.split('.').pop()?.toLowerCase()
+      const canPlay = this.video.canPlayType(`video/${ext}`)
+      if (ext && !canPlay) {
+        reject(new Error(`Unsupported video format: .${ext}`))
+        return
+      }
       this.sourceUrl = URL.createObjectURL(file)
       this.video.src = this.sourceUrl
       this.video.addEventListener('loadedmetadata', () => {
         this.canvas.width = this.video!.videoWidth
         this.canvas.height = this.video!.videoHeight
+        // Seek to time 0 to trigger seeked
+        if (this.video) this.video.currentTime = 0
       })
       this.video.addEventListener('seeked', () => {
         resolve(this.sourceUrl!)
       }, { once: true })
-      this.video.addEventListener('error', () => reject(new Error('Failed to load video')))
+      this.video.addEventListener('error', () => {
+        const err = this.video?.error
+        const msg = err ? `Video error: ${err.message || err.code}` : 'Failed to load video'
+        reject(new Error(msg))
+      })
       this.video.addEventListener('ended', () => {
         if (this.video) this.video.currentTime = 0
       })
