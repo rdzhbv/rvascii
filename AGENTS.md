@@ -91,13 +91,30 @@ The app supports 8 effects selected via the effect grid in the sidebar. Each eff
 | Effect | Render | Description | Key Controls |
 |--------|--------|-------------|-------------|
 | **ASCII** | Text | Classic text-based art | charset, invert, font scale |
-| **Bitmap** | Block | Colored pixel blocks (mosaic) | block size |
+| **Bitmap** | Block | Professional 1-bit B&W dithering — 16 dither modes for retro pixel aesthetics | dither mode, pattern scale, threshold, color mode |
 | **Edge Detect** | Text | Sobel edge detection — outlines only | edge threshold, font scale |
 | **Silhouette** | Block | High-contrast binary threshold | threshold |
 | **Dither** | Block | Error diffusion dithering (Floyd-Steinberg / Bayer) | algorithm |
 | **Halftone** | Text | Offset printing dot pattern | dot size, font scale |
 | **Wave** | Block | Sinusoidal wave distortion | amplitude, frequency |
 | **Oil Paint** | Block | Oil painting color blobs | radius |
+
+### Bitmap Dither Modes
+
+| Mode | Type | Description |
+|------|------|-------------|
+| None | Threshold | Straight cut at threshold value |
+| Floyd-Steinberg | Error Diffusion | Classic algorithm, balanced quality/speed |
+| Atkinson | Error Diffusion | Apple MacPaint style — reduces speckling |
+| Stucki | Error Diffusion | Smoother than Floyd-Steinberg |
+| Jarvis | Error Diffusion | Widest diffusion, smoothest gradients |
+| Sierra / Sierra Lite | Error Diffusion | Good balance, lighter variants |
+| Burkes | Error Diffusion | Optimized Stucki variant |
+| Bayer 2×2 / 4×4 / 8×8 | Ordered | Crosshatch pattern, retro LCD feel |
+| Halftone Dots | Ordered | Clustered dots like newsprint |
+| Line Horizontal / Vertical | Pattern | Scanline effect |
+| Crosshatch | Pattern | Intersecting lines |
+| Random | Noise | White noise thresholding |
 
 ### Effect Registry (core/effects/registry.ts)
 
