@@ -65,8 +65,44 @@ class App {
     }
     this.videoPlayer = new VideoPlayerUI(this.videoPlayerEl, playerCallbacks)
 
+    this.initDragDrop()
+
     clearPreview(this.previewEl)
     this.setStatus('Drop an image or video to begin')
+  }
+
+  private initDragDrop(): void {
+    const area = document.querySelector('.main-area')!
+    const prevent = (e: Event) => { e.preventDefault(); e.stopPropagation() }
+
+    area.addEventListener('dragenter', (e) => {
+      prevent(e)
+      area.classList.add('drag-over')
+    })
+    area.addEventListener('dragover', (e) => {
+      prevent(e)
+      area.classList.add('drag-over')
+    })
+    area.addEventListener('dragleave', (e) => {
+      prevent(e)
+      area.classList.remove('drag-over')
+    })
+    area.addEventListener('drop', (e: Event) => {
+      prevent(e)
+      area.classList.remove('drag-over')
+      const de = e as DragEvent
+      const file = de.dataTransfer?.files?.[0]
+      if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
+        this.handleFile(file)
+        // Sync the file input
+        const fileInput = document.querySelector<HTMLInputElement>('.control-row input[type="file"]')
+        if (fileInput) {
+          const dt = new DataTransfer()
+          dt.items.add(file)
+          fileInput.files = dt.files
+        }
+      }
+    })
   }
 
   private setStatus(msg: string): void {

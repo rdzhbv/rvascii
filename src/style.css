@@ -113,6 +113,16 @@ html, body {
   padding: 0 6px;
 }
 
+.drag-over::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  border: 2px dashed var(--accent);
+  background: rgba(59, 130, 246, 0.04);
+  pointer-events: none;
+  z-index: 100;
+}
+
 .control-row {
   display: flex;
   align-items: center;
@@ -161,6 +171,37 @@ html, body {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
+  cursor: pointer;
+  padding: 1px 2px;
+  border-radius: 2px;
+  transition: background 0.1s;
+}
+
+.control-value:hover {
+  background: var(--surface-2);
+}
+
+.control-value-input {
+  width: 40px;
+  min-width: 40px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  padding: 1px 3px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  border-radius: 2px;
+  outline: none;
+  text-align: right;
+}
+
+.control-value-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.control-value-input[type='number'] {
+  -moz-appearance: textfield;
 }
 
 .control-row select {

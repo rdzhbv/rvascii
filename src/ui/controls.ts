@@ -33,24 +33,69 @@ export function createControlsUI(
   }
 
   const slider = (label: string, min: number, max: number, step: number, value: number, cb: (v: number) => void): void => {
+    const decimals = String(step).includes('.') ? String(step).split('.')[1].length : 0
+    const rnd = (v: number) => v.toFixed(decimals)
+
     const wrap = document.createElement('div')
     wrap.className = 'control-row'
     const lbl = document.createElement('label')
     lbl.textContent = label
-    const valSpan = document.createElement('span')
-    valSpan.className = 'control-value'
-    valSpan.textContent = String(value)
+
     const inp = document.createElement('input')
     inp.type = 'range'
     inp.min = String(min)
     inp.max = String(max)
     inp.step = String(step)
     inp.value = String(value)
+
+    const valSpan = document.createElement('span')
+    valSpan.className = 'control-value'
+    valSpan.textContent = rnd(value)
+    valSpan.dataset.value = String(value)
+    valSpan.tabIndex = 0
+
     inp.addEventListener('input', () => {
       const v = parseFloat(inp.value)
-      valSpan.textContent = String(v)
+      valSpan.textContent = rnd(v)
+      valSpan.dataset.value = String(v)
       cb(v)
     })
+
+    valSpan.addEventListener('click', () => {
+      const current = valSpan.dataset.value || valSpan.textContent!
+      const input = document.createElement('input')
+      input.type = 'number'
+      input.className = 'control-value-input'
+      input.value = current
+      input.min = String(min)
+      input.max = String(max)
+      input.step = String(step)
+      input.tabIndex = 0
+
+      const commit = () => {
+        let v = parseFloat(input.value)
+        if (isNaN(v)) v = parseFloat(valSpan.dataset.value || '0')
+        v = Math.max(min, Math.min(max, v))
+        inp.value = String(v)
+        valSpan.textContent = rnd(v)
+        valSpan.dataset.value = String(v)
+        valSpan.style.display = ''
+        input.replaceWith(valSpan)
+        cb(v)
+      }
+
+      input.addEventListener('blur', commit)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { input.blur(); e.preventDefault() }
+        if (e.key === 'Escape') { valSpan.style.display = ''; input.replaceWith(valSpan); e.preventDefault() }
+      })
+      input.addEventListener('focus', () => input.select())
+
+      valSpan.style.display = 'none'
+      valSpan.after(input)
+      input.focus()
+    })
+
     wrap.appendChild(lbl)
     wrap.appendChild(inp)
     wrap.appendChild(valSpan)
