@@ -62,6 +62,7 @@ class App {
       onCameraToggle: () => this.toggleCamera(),
       onCameraResolutionChange: (res) => this.changeCameraResolution(res),
       onClear: () => this.handleClear(),
+      onResetSettings: () => this.handleResetSettings(),
     })
 
     const playerCallbacks: VideoPlayerCallbacks = {
@@ -346,6 +347,31 @@ class App {
       this.setStatus(`Camera — ${res.label}`)
     } catch {
       this.setStatus(`Failed to switch to ${res.label}`)
+    }
+  }
+
+  private handleResetSettings(): void {
+    this.config = { ...DEFAULT_CONFIG }
+    this.videoProcessor?.updateConfig(this.config)
+    this.cameraController?.updateConfig(this.config)
+    // Rebuild controls with defaults
+    this.controlsEl.innerHTML = ''
+    this.controls = createControlsUI(this.controlsEl, this.config, {
+      onFileLoad: (file) => this.handleFile(file),
+      onConfigChange: (partial) => this.updateConfig(partial),
+      onExport: (format) => this.handleExport(format),
+      onCameraToggle: () => this.toggleCamera(),
+      onCameraResolutionChange: (res) => this.changeCameraResolution(res),
+      onClear: () => this.handleClear(),
+      onResetSettings: () => this.handleResetSettings(),
+    })
+    this.setStatus('Settings reset to defaults')
+    // Re-render if content exists
+    if (this.lastImageData) {
+      this.convertAndRender(this.lastImageData)
+    } else if (this.currentGrid && !this.isVideoMode && !this.isCameraMode) {
+      const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
+      renderGrid(this.currentGrid, this.previewEl, fontSize, this.config.effect)
     }
   }
 

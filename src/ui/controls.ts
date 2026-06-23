@@ -8,6 +8,7 @@ export interface ControlsCallbacks {
   onCameraToggle: () => void
   onCameraResolutionChange: (res: CameraResolution) => void
   onClear: () => void
+  onResetSettings: () => void
 }
 
 export interface ControlsAPI {
@@ -316,6 +317,13 @@ export function createControlsUI(
   const fontScaleRow = slider('Font Scale', 0.5, 3, 0.05, config.fontScale, (v) => callbacks.onConfigChange({ fontScale: v }))
   const invertRow = toggle('Invert', config.invert, (v) => callbacks.onConfigChange({ invert: v }))
   const colorRow = toggle('Color', config.colorEnabled, (v) => callbacks.onConfigChange({ colorEnabled: v }))
+
+  // Reset Settings button
+  const resetBtn = document.createElement('button')
+  resetBtn.className = 'control-btn'
+  resetBtn.textContent = 'Reset Settings'
+  resetBtn.addEventListener('click', () => callbacks.onResetSettings())
+  settingsSection.appendChild(resetBtn)
 
   // ═══════════════════════════════════════════════════════════
   // 6. EFFECT-SPECIFIC SETTINGS
