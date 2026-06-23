@@ -95,9 +95,28 @@ The app supports 8 effects selected via the effect grid in the sidebar. Each eff
 | **Edge Detect** | Text | Sobel edge detection — outlines only | edge threshold, font scale |
 | **Silhouette** | Block | High-contrast binary threshold | threshold |
 | **Dither** | Block | Error diffusion dithering (Floyd-Steinberg / Bayer) | algorithm |
-| **Halftone** | Text | Offset printing dot pattern | dot size, font scale |
+| **Halftone** | Block | AM halftone screen — variable dot size, shape, and angle for retro print aesthetics | frequency, shape, angle, color mode |
 | **Wave** | Block | Sinusoidal wave distortion | amplitude, frequency |
 | **Oil Paint** | Block | Oil painting color blobs | radius |
+
+### Halftone Dot Shapes & Color Modes
+
+| Shape | Description |
+|-------|-------------|
+| Round | Classic circular dots — smooth, natural |
+| Elliptical | Stretched dots — better for skin tones |
+| Square | Hard-edged dots — detailed images |
+| Diamond | Rhomboid dots — artistic effect |
+| Line Horizontal | Horizontal bar lines — scanline aesthetic |
+| Line Vertical | Vertical bar lines |
+
+| Color Mode | Description |
+|------------|-------------|
+| 1-bit B&W | Pure black dots on white background |
+| Color Halftone | Each RGB channel independently screened |
+| Duotone | Dots in one color, background in another |
+
+Screen angle (0–180°) controls the rotation of the halftone grid. Classic print uses 45° for B&W, and separate angles for CMYK.
 
 ### Bitmap Dither Modes
 
