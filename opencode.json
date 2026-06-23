@@ -1,3 +1,9 @@
 {
-  "default_agent": "architect"
+  "default_agent": "architect",
+  "mcpServers": {
+    "figma": {
+      "type": "url",
+      "url": "http://127.0.0.1:3845/mcp"
+    }
+  }
 }
