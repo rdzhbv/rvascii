@@ -1,5 +1,5 @@
-import { DEFAULT_CONFIG, type AsciiConfig, type CameraResolution, type ExportFormat } from './types'
-import { convertImageData } from './core/ascii-converter'
+import { DEFAULT_CONFIG, type AsciiConfig, type CameraResolution, type ExportFormat, type EffectType } from './types'
+import { convertImageData } from './core/process-image'
 import { getImageData } from './core/pixel-processor'
 import { renderGrid, clearPreview } from './ui/preview'
 import { createControlsUI } from './ui/controls'
@@ -32,7 +32,11 @@ class App {
     app.innerHTML = `
       <div class="app-layout">
         <div class="sidebar" id="sidebar">
-          <div class="logo">RVASCII</div>
+          <div class="logo">
+            <div class="logo-icon">R</div>
+            <span class="logo-text">RVASCII</span>
+            <span class="logo-badge">v2</span>
+          </div>
           <div class="controls" id="controls"></div>
         </div>
         <div class="resize-handle" id="resize-handle"></div>
@@ -94,19 +98,22 @@ class App {
       const file = de.dataTransfer?.files?.[0]
       if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
         this.handleFile(file)
-        // Sync the file input
-        const fileInput = document.querySelector<HTMLInputElement>('.control-row input[type="file"]')
+        // Sync the file input and update drop zone text
+        const fileInput = document.querySelector<HTMLInputElement>('.file-drop-area input[type="file"]')
         if (fileInput) {
           const dt = new DataTransfer()
           dt.items.add(file)
           fileInput.files = dt.files
         }
+        const textEl = document.querySelector<HTMLElement>('.file-drop-area .file-text')
+        if (textEl) textEl.textContent = file.name
       }
     })
   }
 
-  private setStatus(msg: string): void {
+  private setStatus(msg: string, isExporting = false): void {
     this.statusEl.textContent = msg
+    this.statusEl.classList.toggle('status-exporting', isExporting)
   }
 
   private initResizableSidebar(): void {
@@ -181,7 +188,7 @@ class App {
       vp.setOnFrame((grid) => {
         this.currentGrid = grid
         const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
-        renderGrid(grid, this.previewEl, fontSize)
+        renderGrid(grid, this.previewEl, fontSize, this.config.effect)
 
         const video = vp.videoElement
         if (video) {
@@ -195,7 +202,7 @@ class App {
       if (firstGrid) {
         this.currentGrid = firstGrid
         const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
-        renderGrid(this.currentGrid, this.previewEl, fontSize)
+        renderGrid(this.currentGrid, this.previewEl, fontSize, this.config.effect)
       }
 
       const video = vp.videoElement
@@ -227,7 +234,7 @@ class App {
     if (grid) {
       this.currentGrid = grid
       const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
-      renderGrid(grid, this.previewEl, fontSize)
+      renderGrid(grid, this.previewEl, fontSize, this.config.effect)
     }
   }
 
@@ -266,7 +273,7 @@ class App {
       this.cameraController.setOnFrame((grid) => {
         this.currentGrid = grid
         const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
-        renderGrid(grid, this.previewEl, fontSize)
+        renderGrid(grid, this.previewEl, fontSize, this.config.effect)
       })
 
       this.cameraController.startPreview()
@@ -308,7 +315,7 @@ class App {
       this.cameraController.setOnFrame((grid) => {
         this.currentGrid = grid
         const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
-        renderGrid(grid, this.previewEl, fontSize)
+        renderGrid(grid, this.previewEl, fontSize, this.config.effect)
       })
       this.cameraController.startPreview()
       this.controls?.setCameraResolution(res)
@@ -338,7 +345,7 @@ class App {
       if (grid) {
         this.currentGrid = grid
         const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
-        renderGrid(grid, this.previewEl, fontSize)
+        renderGrid(grid, this.previewEl, fontSize, this.config.effect)
       }
       return
     }
@@ -349,7 +356,7 @@ class App {
       if (grid) {
         this.currentGrid = grid
         const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
-        renderGrid(grid, this.previewEl, fontSize)
+        renderGrid(grid, this.previewEl, fontSize, this.config.effect)
       }
       return
     }
@@ -357,7 +364,7 @@ class App {
     // Fallback: just re-render existing grid
     if (this.currentGrid && !this.isCameraMode) {
       const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
-      renderGrid(this.currentGrid, this.previewEl, fontSize)
+      renderGrid(this.currentGrid, this.previewEl, fontSize, this.config.effect)
     }
   }
 
@@ -365,7 +372,7 @@ class App {
     this.lastImageData = imageData
     this.currentGrid = convertImageData(imageData, this.config)
     const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
-    renderGrid(this.currentGrid, this.previewEl, fontSize)
+    renderGrid(this.currentGrid, this.previewEl, fontSize, this.config.effect)
     this.controls?.setExportEnabled(true)
     this.setStatus(`Ready - ${this.currentGrid.length} rows x ${this.currentGrid[0].length} cols`)
   }
@@ -376,7 +383,7 @@ class App {
     const fontSize = Math.max(4, Math.round(14 * this.config.fontScale))
 
     if (format === 'mp4' && this.videoProcessor && this.isVideoMode && !this.isCameraMode) {
-      this.setStatus('Recording ASCII video with audio...')
+      this.setStatus(`Recording ${this.config.effect} video with audio...`, true)
       this.controls?.setExportEnabled(false)
       const sourceUrl = this.videoProcessor.sourceURL
       if (!sourceUrl) {
@@ -386,7 +393,7 @@ class App {
       }
       const { exportMP4 } = await import('./export/mp4-exporter')
       const result = await exportMP4(sourceUrl, this.config, fontSize, 24, (current, total) => {
-        this.setStatus(`Recording: ${current}/${total} frames`)
+        this.setStatus(`Recording: ${current}/${total} frames`, true)
       })
       if (result) {
         blob = result.blob
@@ -394,7 +401,7 @@ class App {
       }
       this.controls?.setExportEnabled(true)
     } else if (format === 'gif' && this.videoProcessor && this.isVideoMode && !this.isCameraMode) {
-      this.setStatus('Extracting video frames...')
+      this.setStatus('Extracting video frames...', true)
       this.controls?.setExportEnabled(false)
       const frames = await this.videoProcessor.getAllFrames(10)
       if (frames.length === 0) {
@@ -402,22 +409,23 @@ class App {
         this.controls?.setExportEnabled(true)
         return
       }
-      this.setStatus(`Generating GIF (${frames.length} frames)...`)
+      this.setStatus(`Generating GIF (${frames.length} frames)...`, true)
       const { exportGIF } = await import('./export/gif-exporter')
-      blob = await exportGIF(frames, fontSize, 100, (current, total) => {
-        this.setStatus(`Rendering GIF: ${current}/${total} frames`)
+      blob = await exportGIF(frames, fontSize, 100, this.config.effect, (current, total) => {
+        this.setStatus(`Rendering GIF: ${current}/${total} frames`, true)
       })
       this.controls?.setExportEnabled(true)
     } else if (this.currentGrid) {
+      const effect = this.config.effect
       switch (format) {
         case 'png':
-          blob = await exportPNG(this.currentGrid, fontSize)
+          blob = await exportPNG(this.currentGrid, fontSize, effect)
           break
         case 'svg':
-          blob = await exportSVG(this.currentGrid, fontSize)
+          blob = await exportSVG(this.currentGrid, fontSize, effect)
           break
         case 'jpg':
-          blob = await exportJPG(this.currentGrid, fontSize)
+          blob = await exportJPG(this.currentGrid, fontSize, effect)
           break
       }
     }
@@ -431,10 +439,10 @@ class App {
     const a = document.createElement('a')
     a.href = url
     const ext = format === 'jpg' ? 'jpg' : format === 'mp4' && videoExt ? videoExt : format
-    a.download = `ascii-art.${ext}`
+    a.download = `${this.config.effect}-art.${ext}`
     a.click()
     URL.revokeObjectURL(url)
-    this.setStatus(`Exported as ${format.toUpperCase()}`)
+    this.setStatus(`Exported as ${format.toUpperCase()}`, false)
   }
 }
 

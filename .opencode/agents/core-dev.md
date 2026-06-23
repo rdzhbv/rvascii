@@ -2,7 +2,7 @@
 name: core-dev
 description: Works on the conversion core — pixel-processor, character-mapper, ascii-converter
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: openmodel/deepseek-v4-flash
 permission:
   edit: allow
   bash: ask

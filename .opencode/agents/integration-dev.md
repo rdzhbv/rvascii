@@ -2,7 +2,7 @@
 name: integration-dev
 description: Wires everything in main.ts — App class, lifecycle, callbacks, state
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: openmodel/deepseek-v4-flash
 permission:
   edit: allow
   bash: allow

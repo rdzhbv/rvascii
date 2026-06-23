@@ -1,4 +1,4 @@
-import { convertImageData } from '../core/ascii-converter'
+import { convertImageData } from '../core/process-image'
 import type { AsciiConfig, AsciiGrid, CameraResolution } from '../types'
 import { CAMERA_PRESETS } from '../types'
 

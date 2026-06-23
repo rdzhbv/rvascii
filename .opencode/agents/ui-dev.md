@@ -2,7 +2,7 @@
 name: ui-dev
 description: Owns the interface — controls.ts, preview.ts, video-player.ts, style.css
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: openmodel/deepseek-v4-flash
 permission:
   edit: allow
   bash: ask

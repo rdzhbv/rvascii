@@ -1,4 +1,24 @@
+export type EffectType =
+  | 'ascii'
+  | 'bitmap'
+  | 'edge-detect'
+  | 'silhouette'
+  | 'dither'
+  | 'halftone'
+  | 'wave'
+  | 'oil-paint'
+
+export interface EffectDefinition {
+  id: EffectType
+  name: string
+  description: string
+  renderMode: 'text' | 'block'
+  hasCharset: boolean
+  hasInvert: boolean
+}
+
 export interface AsciiConfig {
+  effect: EffectType
   charset: string
   charsetId: string
   density: number
@@ -8,6 +28,14 @@ export interface AsciiConfig {
   colorEnabled: boolean
   colorFilterId: string
   fontScale: number
+  // Effect-specific parameters
+  edgeThreshold: number
+  silhouetteThreshold: number
+  ditherAlgorithm: 'floyd-steinberg' | 'bayer'
+  halftoneDotSize: number
+  waveAmplitude: number
+  waveFrequency: number
+  oilPaintRadius: number
 }
 
 export interface AsciiCell {
@@ -121,6 +149,7 @@ export const COLOR_FILTERS: ColorFilterEntry[] = [
 ]
 
 export const DEFAULT_CONFIG: AsciiConfig = {
+  effect: 'ascii',
   charset: CHARSET_PRESETS[0].chars,
   charsetId: 'classic',
   density: 1,
@@ -130,4 +159,11 @@ export const DEFAULT_CONFIG: AsciiConfig = {
   colorEnabled: false,
   colorFilterId: 'source',
   fontScale: 1,
+  edgeThreshold: 0.15,
+  silhouetteThreshold: 0.5,
+  ditherAlgorithm: 'floyd-steinberg',
+  halftoneDotSize: 1,
+  waveAmplitude: 0.05,
+  waveFrequency: 3,
+  oilPaintRadius: 3,
 }

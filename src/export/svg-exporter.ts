@@ -1,5 +1,6 @@
 import * as opentype from 'opentype.js'
-import type { AsciiGrid } from '../types'
+import type { AsciiGrid, EffectType } from '../types'
+import { isBlockEffect } from '../core/effects/registry'
 
 let fontPromise: Promise<opentype.Font> | null = null
 
@@ -14,10 +15,30 @@ async function getFont(): Promise<opentype.Font> {
   return fontPromise
 }
 
-export async function exportSVG(grid: AsciiGrid, fontSize: number): Promise<Blob> {
-  const font = await getFont()
+export async function exportSVG(grid: AsciiGrid, fontSize: number, effect: EffectType = 'ascii'): Promise<Blob> {
   const cols = grid[0]?.length || 1
   const rows = grid.length
+  const block = isBlockEffect(effect)
+
+  if (block) {
+    const blockSize = fontSize
+    const w = Math.round(cols * blockSize)
+    const h = Math.round(rows * blockSize)
+    let rects = ''
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cell = grid[r][c]
+        const color = `rgb(${cell.r},${cell.g},${cell.b})`
+        rects += `  <rect x="${c * blockSize}" y="${r * blockSize}" width="${blockSize}" height="${blockSize}" fill="${color}"/>\n`
+      }
+    }
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <rect width="${w}" height="${h}" fill="#000"/>
+${rects}</svg>`
+    return new Blob([svg], { type: 'image/svg+xml' })
+  }
+
+  const font = await getFont()
   const charW = fontSize * 0.6
   const charH = fontSize * 1.2
   const w = Math.round(cols * charW)

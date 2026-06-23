@@ -1,18 +1,17 @@
-import { sampleImageDataGrid } from './pixel-processor'
-import { luminanceToChar } from './character-mapper'
-import { applyColorFilter } from './color-filter'
-import type { AsciiConfig, AsciiGrid } from '../types'
+import { sampleImageDataGrid } from '../pixel-processor'
+import { applyColorFilter } from '../color-filter'
+import type { AsciiConfig, AsciiGrid } from '../../types'
 
-export function convertToAscii(
-  imageData: ImageData,
-  config: AsciiConfig
-): AsciiGrid {
+const NBSP = '\u00A0'
+
+export function processSilhouette(imageData: ImageData, config: AsciiConfig): AsciiGrid {
   const { width, height } = imageData
   const aspect = width / height
   const targetCols = Math.max(20, Math.round(100 * config.density * (aspect > 1 ? aspect : 1)))
   const targetRows = Math.max(10, Math.round(targetCols / aspect * 0.55))
 
   const { lum, r, g, b } = sampleImageDataGrid(imageData, targetCols, targetRows)
+  const threshold = config.silhouetteThreshold
   const grid: AsciiGrid = []
 
   for (let row = 0; row < targetRows; row++) {
@@ -25,8 +24,16 @@ export function convertToAscii(
         const factor = (259 * (config.contrast * 127 + 127)) / (255 * (259 - (config.contrast * 127 + 127)))
         l = Math.max(0, Math.min(1, factor * (l - 0.128) + 0.128))
       }
-      const char = luminanceToChar(l, config.charset, config.invert)
-      const [cr, cg, cb] = applyColorFilter(idx, l, r[idx], g[idx], b[idx], config.colorEnabled, config.colorFilterId)
+
+      // Binary threshold
+      const isBlack = l < threshold
+      const char = isBlack ? NBSP : ' '
+      const fill = isBlack ? 0 : 255
+
+      const [cr, cg, cb] = config.colorEnabled
+        ? applyColorFilter(idx, l, r[idx], g[idx], b[idx], true, config.colorFilterId)
+        : [fill, fill, fill]
+
       gridRow.push({ char, r: cr, g: cg, b: cb })
     }
     grid.push(gridRow)

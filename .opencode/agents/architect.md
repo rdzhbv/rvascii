@@ -2,7 +2,7 @@
 name: architect
 description: Analyzes tasks, builds change plans, delegates work across agents
 mode: primary
-model: anthropic/claude-sonnet-4-6
+model: openmodel/deepseek-v4-flash
 permission:
   edit: allow
   bash: ask

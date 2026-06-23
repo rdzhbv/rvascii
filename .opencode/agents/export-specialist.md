@@ -2,7 +2,7 @@
 name: export-specialist
 description: Owns all exporters — PNG, JPG, SVG, GIF, MP4
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: openmodel/deepseek-v4-flash
 permission:
   edit: allow
   bash:

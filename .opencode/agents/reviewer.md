@@ -2,7 +2,7 @@
 name: reviewer
 description: Reviews code for errors, style, types — read-only
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: openmodel/deepseek-v4-flash
 permission:
   edit: deny
   bash: allow

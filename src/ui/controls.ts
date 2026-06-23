@@ -1,4 +1,5 @@
-import { CHARSET_PRESETS, COLOR_FILTERS, type AsciiConfig, type CameraResolution, type ExportFormat } from '../types'
+import { CHARSET_PRESETS, COLOR_FILTERS, type AsciiConfig, type CameraResolution, type EffectType, type ExportFormat } from '../types'
+import { EFFECT_REGISTRY } from '../core/effects/registry'
 
 export interface ControlsCallbacks {
   onFileLoad: (file: File) => void
@@ -8,18 +9,20 @@ export interface ControlsCallbacks {
   onCameraResolutionChange: (res: CameraResolution) => void
 }
 
-export function createControlsUI(
-  container: HTMLElement,
-  config: AsciiConfig,
-  callbacks: ControlsCallbacks
-): {
+export interface ControlsAPI {
   updateConfig: (config: AsciiConfig) => void
   setExportEnabled: (enabled: boolean) => void
   setCameraUIEnabled: (enabled: boolean) => void
   setCameraActive: (active: boolean) => void
   setCameraResolutions: (resolutions: CameraResolution[]) => void
   setCameraResolution: (res: CameraResolution) => void
-} {
+}
+
+export function createControlsUI(
+  container: HTMLElement,
+  config: AsciiConfig,
+  callbacks: ControlsCallbacks
+): ControlsAPI {
   container.innerHTML = ''
 
   const section = (title: string): HTMLDivElement => {
@@ -32,12 +35,13 @@ export function createControlsUI(
     return s
   }
 
-  const slider = (label: string, min: number, max: number, step: number, value: number, cb: (v: number) => void): void => {
+  const slider = (label: string, min: number, max: number, step: number, value: number, cb: (v: number) => void): HTMLElement => {
     const decimals = String(step).includes('.') ? String(step).split('.')[1].length : 0
     const rnd = (v: number) => v.toFixed(decimals)
 
     const wrap = document.createElement('div')
     wrap.className = 'control-row'
+    wrap.dataset.control = label.toLowerCase().replace(/\s+/g, '-')
     const lbl = document.createElement('label')
     lbl.textContent = label
 
@@ -101,11 +105,13 @@ export function createControlsUI(
     wrap.appendChild(valSpan)
     const lastSection = container.lastElementChild as HTMLDivElement
     if (lastSection) lastSection.appendChild(wrap)
+    return wrap
   }
 
-  const select = (label: string, options: { value: string; text: string }[], value: string, cb: (v: string) => void): void => {
+  const selectControl = (label: string, options: { value: string; text: string }[], value: string, cb: (v: string) => void): HTMLElement => {
     const wrap = document.createElement('div')
     wrap.className = 'control-row'
+    wrap.dataset.control = label.toLowerCase().replace(/\s+/g, '-')
     const lbl = document.createElement('label')
     lbl.textContent = label
     const sel = document.createElement('select')
@@ -121,11 +127,13 @@ export function createControlsUI(
     wrap.appendChild(sel)
     const lastSection = container.lastElementChild as HTMLDivElement
     if (lastSection) lastSection.appendChild(wrap)
+    return wrap
   }
 
-  const toggle = (label: string, value: boolean, cb: (v: boolean) => void): void => {
+  const toggle = (label: string, value: boolean, cb: (v: boolean) => void): HTMLElement => {
     const wrap = document.createElement('div')
     wrap.className = 'control-row'
+    wrap.dataset.control = label.toLowerCase().replace(/\s+/g, '-')
     const lbl = document.createElement('label')
     lbl.textContent = label
     const inp = document.createElement('input')
@@ -136,6 +144,7 @@ export function createControlsUI(
     wrap.appendChild(inp)
     const lastSection = container.lastElementChild as HTMLDivElement
     if (lastSection) lastSection.appendChild(wrap)
+    return wrap
   }
 
   const btn = (label: string, cb: () => void): void => {
@@ -146,24 +155,40 @@ export function createControlsUI(
     container.appendChild(b)
   }
 
-  // File input
+  // ═══════════════════════════════════════════════════════════
+  // 1. FILE INPUT
+  // ═══════════════════════════════════════════════════════════
   const fileSection = section('Input')
-  const fileRow = document.createElement('div')
-  fileRow.className = 'control-row'
+  const fileArea = document.createElement('div')
+  fileArea.className = 'file-drop-area'
+  const fileLabel = document.createElement('label')
+  fileLabel.className = 'file-label'
+  fileLabel.innerHTML = `
+    <span class="file-icon">⤴</span>
+    <span class="file-text">Drop image or video here</span>
+    <span class="file-hint">or click to browse</span>
+  `
   const fileInput = document.createElement('input')
   fileInput.type = 'file'
   fileInput.accept = 'image/*,video/*'
   fileInput.addEventListener('change', () => {
     const f = fileInput.files?.[0]
-    if (f) callbacks.onFileLoad(f)
+    if (f) {
+      callbacks.onFileLoad(f)
+      const textEl = fileArea.querySelector('.file-text') as HTMLElement
+      if (textEl) textEl.textContent = f.name
+    }
   })
-  fileRow.appendChild(fileInput)
-  fileSection.appendChild(fileRow)
+  fileLabel.appendChild(fileInput)
+  fileArea.appendChild(fileLabel)
+  fileSection.appendChild(fileArea)
 
-  // Camera
+  // ═══════════════════════════════════════════════════════════
+  // 2. CAMERA
+  // ═══════════════════════════════════════════════════════════
   const cameraSection = section('Camera')
   const camBtn = document.createElement('button')
-  camBtn.textContent = 'Start Camera'
+  camBtn.innerHTML = `<span class="cam-indicator"></span> Start Camera`
   camBtn.className = 'cam-btn'
   camBtn.addEventListener('click', () => callbacks.onCameraToggle())
   cameraSection.appendChild(camBtn)
@@ -185,7 +210,43 @@ export function createControlsUI(
   resRow.appendChild(resSel)
   cameraSection.appendChild(resRow)
 
-  // Charset
+  // ═══════════════════════════════════════════════════════════
+  // 3. EFFECT SELECTOR
+  // ═══════════════════════════════════════════════════════════
+  const effectSection = section('Effect')
+  const effectDesc = document.createElement('div')
+  effectDesc.className = 'effect-description'
+  effectSection.appendChild(effectDesc)
+
+  const effectRow = document.createElement('div')
+  effectRow.className = 'effect-grid'
+  effectRow.id = 'effect-grid'
+
+  const effectTypes = Object.keys(EFFECT_REGISTRY) as EffectType[]
+  for (const eid of effectTypes) {
+    const def = EFFECT_REGISTRY[eid].definition
+    const btn = document.createElement('button')
+    btn.className = 'effect-btn'
+    btn.dataset.effect = eid
+    btn.innerHTML = `<span class="effect-btn-label">${def.name}</span>`
+    if (eid === config.effect) btn.classList.add('effect-btn-active')
+    btn.title = def.description
+    btn.addEventListener('click', () => {
+      callbacks.onConfigChange({ effect: eid } as Partial<AsciiConfig>)
+    })
+    effectRow.appendChild(btn)
+  }
+  effectSection.appendChild(effectRow)
+
+  function updateEffectDescription(effect: EffectType) {
+    const def = EFFECT_REGISTRY[effect]?.definition
+    effectDesc.textContent = def?.description ?? ''
+  }
+  updateEffectDescription(config.effect)
+
+  // ═══════════════════════════════════════════════════════════
+  // 4. CHARSET (ASCII only)
+  // ═══════════════════════════════════════════════════════════
   const charSection = section('Characters')
   const charRow = document.createElement('div')
   charRow.className = 'control-row'
@@ -227,16 +288,35 @@ export function createControlsUI(
   charRow.appendChild(charSel)
   charSection.appendChild(charRow)
 
-  // Settings
+  // ═══════════════════════════════════════════════════════════
+  // 5. COMMON SETTINGS (shown for all effects)
+  // ═══════════════════════════════════════════════════════════
   const settingsSection = section('Settings')
-  slider('Density', 0.25, 2, 0.05, config.density, (v) => callbacks.onConfigChange({ density: v }))
-  slider('Contrast', 0, 2, 0.05, config.contrast, (v) => callbacks.onConfigChange({ contrast: v }))
-  slider('Brightness', 0.1, 2, 0.05, config.brightness, (v) => callbacks.onConfigChange({ brightness: v }))
-  slider('Font Scale', 0.5, 3, 0.05, config.fontScale, (v) => callbacks.onConfigChange({ fontScale: v }))
-  toggle('Invert', config.invert, (v) => callbacks.onConfigChange({ invert: v }))
-  toggle('Color', config.colorEnabled, (v) => callbacks.onConfigChange({ colorEnabled: v }))
+  const densityRow = slider('Density', 0.25, 2, 0.05, config.density, (v) => callbacks.onConfigChange({ density: v }))
+  const contrastRow = slider('Contrast', 0, 2, 0.05, config.contrast, (v) => callbacks.onConfigChange({ contrast: v }))
+  const brightnessRow = slider('Brightness', 0.1, 2, 0.05, config.brightness, (v) => callbacks.onConfigChange({ brightness: v }))
+  const fontScaleRow = slider('Font Scale', 0.5, 3, 0.05, config.fontScale, (v) => callbacks.onConfigChange({ fontScale: v }))
+  const invertRow = toggle('Invert', config.invert, (v) => callbacks.onConfigChange({ invert: v }))
+  const colorRow = toggle('Color', config.colorEnabled, (v) => callbacks.onConfigChange({ colorEnabled: v }))
 
-  // Color Filter
+  // ═══════════════════════════════════════════════════════════
+  // 6. EFFECT-SPECIFIC SETTINGS
+  // ═══════════════════════════════════════════════════════════
+  const effectSettingsSection = section('Effect Settings')
+  const edgeThresholdRow = slider('Edge Threshold', 0.02, 0.5, 0.01, config.edgeThreshold, (v) => callbacks.onConfigChange({ edgeThreshold: v }))
+  const silhouetteThresholdRow = slider('Threshold', 0.1, 0.9, 0.05, config.silhouetteThreshold, (v) => callbacks.onConfigChange({ silhouetteThreshold: v }))
+  const ditherAlgoRow = selectControl('Algorithm', [
+    { value: 'floyd-steinberg', text: 'Floyd-Steinberg' },
+    { value: 'bayer', text: 'Bayer 4×4' },
+  ], config.ditherAlgorithm, (v) => callbacks.onConfigChange({ ditherAlgorithm: v as 'floyd-steinberg' | 'bayer' }))
+  const halftoneDotRow = slider('Dot Size', 0.5, 3, 0.1, config.halftoneDotSize, (v) => callbacks.onConfigChange({ halftoneDotSize: v }))
+  const waveAmplitudeRow = slider('Amplitude', 0.01, 0.2, 0.005, config.waveAmplitude, (v) => callbacks.onConfigChange({ waveAmplitude: v }))
+  const waveFreqRow = slider('Frequency', 1, 8, 0.5, config.waveFrequency, (v) => callbacks.onConfigChange({ waveFrequency: v }))
+  const oilRadiusRow = slider('Radius', 1, 8, 1, config.oilPaintRadius, (v) => callbacks.onConfigChange({ oilPaintRadius: v }))
+
+  // ═══════════════════════════════════════════════════════════
+  // 7. COLOR FILTER
+  // ═══════════════════════════════════════════════════════════
   const colorSection = section('Color Filter')
   const filterTypes: Record<string, string> = {
     source: 'Original',
@@ -279,14 +359,16 @@ export function createControlsUI(
   }
   updateColorFilterDisabled()
 
-  // Export
+  // ═══════════════════════════════════════════════════════════
+  // 8. EXPORT
+  // ═══════════════════════════════════════════════════════════
   const exportSection = section('Export')
   const exportRow = document.createElement('div')
   exportRow.className = 'export-row'
   const formats: ExportFormat[] = ['png', 'svg', 'jpg', 'gif', 'mp4']
   for (const fmt of formats) {
     const b = document.createElement('button')
-    b.textContent = fmt.toUpperCase()
+    b.innerHTML = `<span>${fmt.toUpperCase()}</span>`
     b.className = 'export-btn'
     b.disabled = true
     b.addEventListener('click', () => callbacks.onExport(fmt))
@@ -294,9 +376,72 @@ export function createControlsUI(
   }
   exportSection.appendChild(exportRow)
 
+  // ═══════════════════════════════════════════════════════════
+  // VISIBILITY MAP: which controls are visible per effect
+  // ═══════════════════════════════════════════════════════════
+  const allControlRows: Record<string, HTMLElement> = {
+    'charset': charSection,
+    'invert': invertRow,
+    'font-scale': fontScaleRow,
+    'edge-threshold': edgeThresholdRow,
+    'threshold': silhouetteThresholdRow,
+    'algorithm': ditherAlgoRow,
+    'dot-size': halftoneDotRow,
+    'amplitude': waveAmplitudeRow,
+    'frequency': waveFreqRow,
+    'radius': oilRadiusRow,
+  }
+
+  const effectControlMap: Record<EffectType, string[]> = {
+    'ascii':         ['charset', 'invert', 'font-scale'],
+    'bitmap':        ['font-scale'],  // shows as "Block Size"
+    'edge-detect':   ['edge-threshold', 'font-scale'],
+    'silhouette':    ['threshold'],
+    'dither':        ['algorithm'],
+    'halftone':      ['dot-size', 'font-scale'],
+    'wave':          ['amplitude', 'frequency'],
+    'oil-paint':     ['radius'],
+  }
+
+  function applyEffectVisibility(effect: EffectType) {
+    const def = EFFECT_REGISTRY[effect]?.definition
+    const visibleControls = effectControlMap[effect] ?? []
+
+    // Show/hide each control
+    for (const [key, el] of Object.entries(allControlRows)) {
+      el.style.display = visibleControls.includes(key) ? '' : 'none'
+    }
+
+    // Show effect-specific settings section label if any controls are visible
+    const hasEffectControls = visibleControls.some((c) =>
+      !['charset', 'invert', 'font-scale'].includes(c)
+    )
+    effectSettingsSection.style.display = hasEffectControls ? '' : 'none'
+
+    // Update labels
+    if (def) {
+      const isBlock = def.renderMode === 'block'
+      const fl = fontScaleRow.querySelector('label')
+      if (fl) fl.textContent = isBlock ? 'Block Size' : 'Font Scale'
+    }
+
+    // Update effect buttons
+    effectRow.querySelectorAll('.effect-btn').forEach((b) => {
+      (b as HTMLButtonElement).classList.toggle('effect-btn-active', (b as HTMLButtonElement).dataset.effect === effect)
+    })
+
+    // Update description
+    updateEffectDescription(effect)
+  }
+
+  // Apply initial state
+  applyEffectVisibility(config.effect)
+
   return {
     updateConfig(newConfig: AsciiConfig) {
       config = newConfig
+
+      // Update color filter
       filterSel.disabled = !config.colorEnabled
       for (let i = 0; i < filterSel.options.length; i++) {
         if (filterSel.options[i].value === config.colorFilterId) {
@@ -304,6 +449,8 @@ export function createControlsUI(
           break
         }
       }
+
+      applyEffectVisibility(config.effect)
     },
     setExportEnabled(enabled: boolean) {
       const btns = container.querySelectorAll('.export-btn')
@@ -314,7 +461,9 @@ export function createControlsUI(
       if (resSel) resSel.disabled = !enabled
     },
     setCameraActive(active: boolean) {
-      camBtn.textContent = active ? 'Stop Camera' : 'Start Camera'
+      camBtn.innerHTML = active
+        ? '<span class="cam-indicator"></span> Stop Camera'
+        : '<span class="cam-indicator"></span> Start Camera'
       camBtn.classList.toggle('cam-active', active)
       if (resSel) resSel.disabled = !active
     },

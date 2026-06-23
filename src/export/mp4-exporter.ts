@@ -1,5 +1,5 @@
-import { convertImageData } from '../core/ascii-converter'
 import type { AsciiConfig } from '../types'
+import { isBlockEffect } from '../core/effects/registry'
 
 function getSupportedMimeInfo(): { mime: string; ext: string } | null {
   const types: [string, string][] = [
@@ -72,6 +72,50 @@ function renderASCIIFrame(
   }
 }
 
+function renderBitmapFrame(
+  ctx: CanvasRenderingContext2D,
+  imageData: ImageData,
+  config: AsciiConfig,
+  cols: number,
+  rows: number,
+  blockSize: number
+): void {
+  const { data, width, height } = imageData
+  const xStep = width / cols
+  const yStep = height / rows
+  const outW = Math.round(cols * blockSize)
+  const outH = Math.round(rows * blockSize)
+
+  ctx.fillStyle = '#000'
+  ctx.fillRect(0, 0, outW, outH)
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const sx = Math.min(Math.floor(c * xStep), width - 1)
+      const sy = Math.min(Math.floor(r * yStep), height - 1)
+      const idx = (sy * width + sx) * 4
+      const pr = data[idx]
+      const pg = data[idx + 1]
+      const pb = data[idx + 2]
+      const lum = (0.299 * pr + 0.587 * pg + 0.114 * pb) / 255
+      let l = Math.max(0, Math.min(1, lum * config.brightness))
+
+      if (config.contrast !== 1) {
+        const factor = (259 * (config.contrast * 127 + 127)) / (255 * (259 - (config.contrast * 127 + 127)))
+        l = Math.max(0, Math.min(1, factor * (l - 0.128) + 0.128))
+      }
+
+      if (config.colorEnabled) {
+        ctx.fillStyle = `rgb(${pr},${pg},${pb})`
+      } else {
+        const v = Math.round(l * 255)
+        ctx.fillStyle = `rgb(${v},${v},${v})`
+      }
+      ctx.fillRect(c * blockSize, r * blockSize, blockSize, blockSize)
+    }
+  }
+}
+
 export async function exportMP4(
   sourceUrl: string,
   config: AsciiConfig,
@@ -108,9 +152,11 @@ export async function exportMP4(
   const aspect = vw / vh
   const targetCols = Math.max(20, Math.round(100 * config.density * (aspect > 1 ? aspect : 1)))
   const targetRows = Math.max(10, Math.round(targetCols / aspect * 0.55))
+  const block = isBlockEffect(config.effect)
+  const blockSize = fontSize
   const [charW, charH] = getASCIICharSize(fontSize)
-  const outW = Math.round(targetCols * charW)
-  const outH = Math.round(targetRows * charH)
+  const outW = block ? Math.round(targetCols * blockSize) : Math.round(targetCols * charW)
+  const outH = block ? Math.round(targetRows * blockSize) : Math.round(targetRows * charH)
 
   const canvas = document.createElement('canvas')
   canvas.width = outW
@@ -164,7 +210,11 @@ export async function exportMP4(
       if (video.readyState >= 2) {
         captureCtx.drawImage(video, 0, 0)
         const imageData = captureCtx.getImageData(0, 0, vw, vh)
-        renderASCIIFrame(ctx, imageData, config, targetCols, targetRows, charW, charH, fontSize)
+        if (block) {
+          renderBitmapFrame(ctx, imageData, config, targetCols, targetRows, blockSize)
+        } else {
+          renderASCIIFrame(ctx, imageData, config, targetCols, targetRows, charW, charH, fontSize)
+        }
         frameCount++
         onProgress?.(frameCount, totalFrames)
       }

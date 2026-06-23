@@ -2,7 +2,7 @@
 name: security-review
 description: Security code review — audits XSS, injection, secrets, dependency risks
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: openmodel/deepseek-v4-flash
 permission:
   edit: deny
   bash: allow

@@ -1,4 +1,4 @@
-import { convertImageData } from '../core/ascii-converter'
+import { convertImageData } from '../core/process-image'
 import type { AsciiConfig, AsciiGrid } from '../types'
 
 export class VideoProcessor {
