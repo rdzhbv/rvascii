@@ -42,8 +42,20 @@ export class VideoPlayerUI {
     this.seekBar.max = '1'
     this.seekBar.step = '0.001'
     this.seekBar.value = '0'
+
+    const updateSeekFill = () => {
+      const mn = parseFloat(this.seekBar.min)
+      const mx = parseFloat(this.seekBar.max)
+      const v = parseFloat(this.seekBar.value)
+      if (mx > mn) {
+        const pct = ((v - mn) / (mx - mn)) * 100
+        this.seekBar.style.setProperty('--seek-fill', `${pct}%`)
+      }
+    }
+
     this.seekBar.addEventListener('input', () => {
       this.isSeeking = true
+      updateSeekFill()
     })
     this.seekBar.addEventListener('change', () => {
       this.isSeeking = false
@@ -85,6 +97,13 @@ export class VideoPlayerUI {
     if (!this.isSeeking && isFinite(duration) && duration > 0) {
       this.seekBar.max = String(duration)
       this.seekBar.value = String(Math.min(current, duration))
+      const mn = parseFloat(this.seekBar.min)
+      const mx = parseFloat(this.seekBar.max)
+      const v = parseFloat(this.seekBar.value)
+      if (mx > mn) {
+        const pct = ((v - mn) / (mx - mn)) * 100
+        this.seekBar.style.setProperty('--seek-fill', `${pct}%`)
+      }
     }
   }
 

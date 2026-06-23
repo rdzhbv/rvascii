@@ -25,13 +25,13 @@
 /* ── Design Tokens ──────────────────────────────────────── */
 
 :root {
-  /* Surface palette */
-  --bg: #0f0f0f;
-  --surface: #1a1a1a;
-  --surface-2: #252525;
-  --surface-3: #2e2e2e;
-  --border: #333333;
-  --border-hover: #444444;
+  /* Surface palette — OLED-optimized blacks */
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1e1e1e;
+  --surface-3: #282828;
+  --border: #2e2e2e;
+  --border-hover: #3a3a3a;
 
   /* Text palette */
   --text: #e8e8e8;
@@ -39,20 +39,32 @@
   --text-muted: #6b7280;
   --text-dim: #4b5563;
 
-  /* Accent palette — cold tech */
+  /* Accent palette — cyan primary */
   --accent: #00d4ff;
   --accent-hover: #38e0ff;
   --accent-dim: rgba(0, 212, 255, 0.12);
   --accent-glow: rgba(0, 212, 255, 0.08);
+  --accent-glow-strong: rgba(0, 212, 255, 0.25);
+
+  /* Accent palette — blue secondary */
   --accent-secondary: #3b82f6;
   --accent-secondary-dim: rgba(59, 130, 246, 0.1);
+  --accent-secondary-glow: rgba(59, 130, 246, 0.2);
+
+  /* Accent palette — magenta tertiary */
+  --accent-tertiary: #a855f7;
+  --accent-tertiary-dim: rgba(168, 85, 247, 0.12);
+  --accent-tertiary-hover: #c084fc;
+  --accent-tertiary-glow: rgba(168, 85, 247, 0.2);
 
   /* Status colors */
   --danger: #ef4444;
   --danger-bg: rgba(239, 68, 68, 0.1);
   --danger-hover: rgba(239, 68, 68, 0.18);
   --success: #22c55e;
+  --success-bg: rgba(34, 197, 94, 0.1);
   --warning: #f59e0b;
+  --warning-bg: rgba(245, 158, 11, 0.1);
 
   /* Focus & interaction */
   --focus-ring: rgba(0, 212, 255, 0.45);
@@ -66,6 +78,14 @@
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
 
   /* Transitions */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -122,7 +142,9 @@ html, body {
   width: 248px;
   min-width: 180px;
   max-width: 480px;
-  background: var(--surface);
+  background: rgba(20, 20, 20, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -132,24 +154,25 @@ html, body {
 /* ── Resize Handle ───────────────────────────────────────── */
 
 .resize-handle {
-  width: 4px;
+  width: 5px;
   cursor: col-resize;
   background: transparent;
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  transition: background var(--duration) var(--ease);
+  transition: background var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
 }
 
 .resize-handle::after {
   content: '';
   position: absolute;
-  inset: 0 -3px;
+  inset: 0 -4px;
 }
 
 .resize-handle:hover,
 .resize-handle:active {
   background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow-strong), 0 0 12px var(--accent-glow);
 }
 
 /* ── Logo / Brand ────────────────────────────────────────── */
@@ -161,6 +184,9 @@ html, body {
   padding: 18px 16px 14px;
   user-select: none;
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 var(--accent-glow), 0 2px 6px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
 }
 
 .logo-icon {
@@ -174,17 +200,24 @@ html, body {
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
-  color: #0f0f0f;
+  color: #0a0a0a;
   flex-shrink: 0;
+  transition: box-shadow var(--duration) var(--ease), transform var(--duration) var(--ease);
+}
+
+.logo:hover .logo-icon {
+  box-shadow: 0 0 12px var(--accent-glow), 0 0 24px var(--accent-glow);
 }
 
 .logo-text {
   font-family: var(--font-mono);
   font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 2px;
+  font-weight: 800;
+  letter-spacing: 3px;
   color: var(--text);
   line-height: 1;
+  text-shadow: 0 0 20px var(--accent-glow), 0 0 40px var(--accent-glow);
+  transition: text-shadow var(--duration) var(--ease);
 }
 
 .logo-badge {
@@ -206,10 +239,11 @@ html, body {
   padding: 8px 12px 16px;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.015);
 }
 
 .controls::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 
 .controls::-webkit-scrollbar-track {
@@ -218,11 +252,16 @@ html, body {
 
 .controls::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 2px;
+  border-radius: 3px;
+  min-height: 40px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+  transition: background var(--duration) var(--ease);
 }
 
 .controls::-webkit-scrollbar-thumb:hover {
-  background: var(--border-hover);
+  background: var(--accent);
+  background-clip: content-box;
 }
 
 /* ── Control Sections ────────────────────────────────────── */
@@ -236,13 +275,20 @@ html, body {
 }
 
 .control-section h3 {
-  font-size: 8px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.8px;
   color: var(--text-dim);
-  margin-bottom: 6px;
-  padding: 0 4px;
+  margin-bottom: var(--space-3);
+  padding: 0 var(--space-1);
+  transition: color var(--duration) var(--ease);
+  cursor: pointer;
+  user-select: none;
+}
+
+.control-section h3:hover {
+  color: var(--text-secondary);
 }
 
 /* ── Drag Over State ─────────────────────────────────────── */
@@ -255,6 +301,7 @@ html, body {
   background: var(--accent-glow);
   pointer-events: none;
   z-index: 100;
+  animation: dragPulse 1.2s ease-in-out infinite;
 }
 
 /* ── Control Rows ────────────────────────────────────────── */
@@ -281,7 +328,7 @@ html, body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 450;
+  font-weight: 500;
   cursor: default;
 }
 
@@ -292,47 +339,50 @@ html, body {
   appearance: none;
   flex: 1;
   height: 2px;
-  background: var(--border);
+  background: linear-gradient(to right, var(--accent) var(--track-fill, 0%), var(--border) var(--track-fill, 0%));
   border-radius: 2px;
   outline: none;
   cursor: pointer;
   min-width: 60px;
-  transition: background var(--duration) var(--ease);
-}
-
-.control-row input[type="range"]:hover {
-  background: var(--border-hover);
+  transition: background 0.2s var(--ease);
 }
 
 .control-row input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
   border: 2px solid var(--surface-2);
-  box-shadow: 0 0 0 1px var(--border);
-  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  box-shadow: 0 0 0 1px var(--border), 0 0 8px var(--accent-glow);
+  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease), background 0.15s var(--ease);
 }
 
 .control-row input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.25);
-  box-shadow: 0 0 8px var(--accent-dim);
+  transform: scale(1.3);
+  box-shadow: 0 0 0 1px var(--accent-dim), 0 0 14px var(--accent-glow);
+  background: var(--accent-hover);
 }
 
 .control-row input[type="range"]:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--focus-ring);
+  box-shadow: 0 0 0 2px var(--focus-ring), 0 0 12px var(--accent-glow);
 }
 
 .control-row input[type="range"]::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
   border: 2px solid var(--surface-2);
-  box-shadow: 0 0 0 1px var(--border);
+  box-shadow: 0 0 0 1px var(--border), 0 0 8px var(--accent-glow);
+}
+
+.control-row input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: linear-gradient(to right, var(--accent) var(--track-fill, 0%), var(--border) var(--track-fill, 0%));
+  border-radius: 2px;
 }
 
 .control-value {
@@ -343,15 +393,16 @@ html, body {
   font-variant-numeric: tabular-nums;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 2px 4px;
+  padding: 2px 6px;
   border-radius: var(--radius-sm);
-  transition: background 0.1s, color 0.1s;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease), box-shadow 0.15s var(--ease);
   user-select: none;
 }
 
 .control-value:hover {
   background: var(--surface-3);
   color: var(--text-secondary);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .control-value-input {
@@ -367,6 +418,11 @@ html, body {
   border-radius: var(--radius-sm);
   outline: none;
   text-align: right;
+}
+
+.control-value-input:focus {
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
 .control-value-input::-webkit-inner-spin-button {
@@ -407,11 +463,29 @@ html, body {
 
 .control-row select:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
 .control-row select:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+.control-row select optgroup {
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: 0.5px;
+  padding: 4px 6px;
+}
+
+.control-row select option {
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 4px 6px;
+  font-size: 11px;
 }
 
 /* ── Clear Button ────────────────────────────────────────── */
@@ -437,10 +511,11 @@ html, body {
 .control-clear-btn:hover {
   background: var(--danger-hover);
   border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 12px var(--danger-bg);
 }
 
 .control-clear-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 /* ── Camera Button ───────────────────────────────────────── */
@@ -485,15 +560,18 @@ html, body {
   background: var(--danger-bg);
   border-color: var(--danger);
   color: var(--danger);
+  box-shadow: 0 0 16px var(--danger-bg), 0 0 32px var(--danger-bg);
 }
 
 .cam-btn.cam-active:hover {
   background: var(--danger-hover);
+  box-shadow: 0 0 20px var(--danger-bg), 0 0 40px var(--danger-bg);
 }
 
 .cam-btn.cam-active .cam-indicator {
   background: var(--danger);
   box-shadow: 0 0 4px var(--danger);
+  animation: camPulse 1.5s ease-in-out infinite;
 }
 
 .cam-btn:disabled {
@@ -510,7 +588,7 @@ html, body {
   justify-content: center;
   width: 100%;
   min-height: 64px;
-  border: 1px dashed var(--border);
+  border: 1.5px dashed var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--duration) var(--ease);
@@ -518,8 +596,9 @@ html, body {
 }
 
 .file-drop-area:hover {
-  border-color: var(--border-hover);
-  background: rgba(255, 255, 255, 0.01);
+  border-color: var(--accent-dim);
+  background: rgba(0, 212, 255, 0.02);
+  box-shadow: 0 0 16px var(--accent-glow);
 }
 
 .file-drop-area:active {
@@ -605,19 +684,23 @@ html, body {
 .control-row input[type="checkbox"]:checked {
   background: var(--accent-dim);
   border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
 }
 
 .control-row input[type="checkbox"]:checked::after {
   left: 16px;
   background: var(--accent);
+  box-shadow: 0 0 4px var(--accent);
 }
 
 .control-row input[type="checkbox"]:hover {
   border-color: var(--border-hover);
+  background: var(--surface-3);
 }
 
 .control-row input[type="checkbox"]:hover:checked {
   border-color: var(--accent-hover);
+  box-shadow: 0 0 12px var(--accent-glow);
 }
 
 .control-row input[type="checkbox"]:hover:checked::after {
@@ -662,6 +745,7 @@ html, body {
   color: var(--accent-hover);
   border-color: var(--accent);
   background: transparent;
+  box-shadow: 0 0 12px var(--accent-glow);
 }
 
 .export-btn:hover:not(:disabled)::before {
@@ -669,15 +753,71 @@ html, body {
 }
 
 .export-btn:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.96);
+  box-shadow: none;
 }
 
 .export-btn:disabled {
-  opacity: 0.15;
+  opacity: 0.25;
   cursor: not-allowed;
+  filter: grayscale(0.6);
 }
 
 .export-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Export button — secondary (magenta) accent variant */
+.export-btn-secondary {
+  position: relative;
+  padding: 7px 4px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transition: all var(--duration) var(--ease);
+  overflow: hidden;
+}
+
+.export-btn-secondary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-tertiary-dim), var(--accent-secondary-dim));
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease);
+}
+
+.export-btn-secondary:hover:not(:disabled) {
+  color: var(--accent-tertiary-hover);
+  border-color: var(--accent-tertiary);
+  background: transparent;
+  box-shadow: 0 0 12px var(--accent-tertiary-glow);
+}
+
+.export-btn-secondary:hover:not(:disabled)::before {
+  opacity: 1;
+}
+
+.export-btn-secondary:active:not(:disabled) {
+  transform: scale(0.96);
+  box-shadow: none;
+}
+
+.export-btn-secondary:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}
+
+.export-btn-secondary span {
   position: relative;
   z-index: 1;
 }
@@ -703,6 +843,13 @@ html, body {
   align-items: center;
   justify-content: center;
   position: relative;
+  background-color: var(--bg);
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.018) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
 }
 
 .preview-content {
@@ -722,9 +869,10 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   pointer-events: none;
   user-select: none;
+  animation: placeholderFloat 3s ease-in-out infinite;
 }
 
 .preview-placeholder-icon {
@@ -739,12 +887,15 @@ html, body {
   font-size: 20px;
   color: var(--text-dim);
   transition: all var(--duration) var(--ease);
+  animation: glowPulse 4s ease-in-out infinite;
+  background: rgba(255, 255, 255, 0.015);
 }
 
 .preview-placeholder-text {
   font-size: 13px;
   color: var(--text-dim);
   font-weight: 450;
+  transition: color var(--duration) var(--ease);
 }
 
 .preview-placeholder-hint {
@@ -759,7 +910,9 @@ html, body {
   align-items: center;
   gap: 10px;
   padding: 8px 14px;
-  background: var(--surface);
+  background: rgba(20, 20, 20, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -785,7 +938,7 @@ html, body {
   cursor: pointer;
   transition: all var(--duration) var(--ease);
   line-height: 1;
-  min-width: 32px;
+  min-width: 34px;
   text-align: center;
   font-family: var(--font-ui);
 }
@@ -794,9 +947,29 @@ html, body {
   background: var(--surface-3);
   border-color: var(--border-hover);
   color: var(--text);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
 }
 
 .vp-btn:active {
+  transform: scale(0.95);
+}
+
+/* Play/Pause button — magenta accent for color hierarchy */
+.vp-play-btn {
+  background: var(--accent-tertiary-dim);
+  border-color: rgba(168, 85, 247, 0.25);
+  color: var(--accent-tertiary);
+  min-width: 38px;
+}
+
+.vp-play-btn:hover {
+  background: var(--accent-tertiary-dim);
+  border-color: var(--accent-tertiary);
+  color: var(--accent-tertiary-hover);
+  box-shadow: 0 0 8px var(--accent-tertiary-glow);
+}
+
+.vp-play-btn:active {
   transform: scale(0.95);
 }
 
@@ -814,58 +987,85 @@ html, body {
   -webkit-appearance: none;
   appearance: none;
   flex: 1;
-  height: 2px;
-  background: var(--border);
-  border-radius: 2px;
+  height: 4px;
+  background: linear-gradient(to right, var(--accent) var(--seek-fill, 0%), var(--border) var(--seek-fill, 0%));
+  border-radius: 4px;
   outline: none;
   cursor: pointer;
   min-width: 40px;
-  transition: background var(--duration) var(--ease);
-}
-
-.vp-seekbar:hover {
-  background: var(--border-hover);
+  transition: background 0.2s var(--ease);
+  position: relative;
 }
 
 .vp-seekbar::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
   border: 2px solid var(--surface);
-  box-shadow: 0 0 0 1px var(--border);
-  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 0 8px var(--accent-glow);
+  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease), background 0.15s var(--ease);
 }
 
 .vp-seekbar::-webkit-slider-thumb:hover {
-  transform: scale(1.25);
-  box-shadow: 0 0 8px var(--accent-dim);
+  transform: scale(1.3);
+  box-shadow: 0 0 0 1px var(--accent-dim), 0 0 14px var(--accent-glow);
+  background: var(--accent-hover);
+}
+
+.vp-seekbar:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 2px var(--focus-ring), 0 0 12px var(--accent-glow);
 }
 
 .vp-seekbar::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
   border: 2px solid var(--surface);
-  box-shadow: 0 0 0 1px var(--border);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 0 8px var(--accent-glow);
+}
+
+/* Filled portion of seekbar — Firefox */
+.vp-seekbar::-moz-range-track {
+  height: 4px;
+  background: linear-gradient(to right, var(--accent) var(--seek-fill, 0%), var(--border) var(--seek-fill, 0%));
+  border-radius: 4px;
+}
+
+.vp-seekbar::-moz-range-progress {
+  height: 4px;
+  background: var(--accent);
+  border-radius: 4px;
 }
 
 /* ── Status Bar ──────────────────────────────────────────── */
 
 .status {
-  padding: 7px 14px;
-  font-size: 10px;
+  padding: 8px 16px;
+  font-size: 11px;
   font-family: var(--font-mono);
-  color: var(--text-dim);
+  color: var(--text-muted);
   border-top: 1px solid var(--border);
   text-align: center;
   flex-shrink: 0;
-  letter-spacing: 0.3px;
-  transition: color var(--duration) var(--ease);
+  letter-spacing: 0.4px;
+  transition: color var(--duration) var(--ease), background var(--duration) var(--ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+}
+
+.status-exporting {
+  color: var(--accent);
+  background: var(--warning-bg);
+  animation: statusExportPulse 1.2s ease-in-out infinite;
+  border-top-color: rgba(0, 212, 255, 0.2);
 }
 
 /* ── Control Button (generic, for any standalone btn) ────── */
@@ -889,12 +1089,13 @@ html, body {
 }
 
 .control-btn:hover {
-  background: rgba(59, 130, 246, 0.18);
-  border-color: rgba(59, 130, 246, 0.3);
+  background: var(--accent-secondary-dim);
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 12px var(--accent-secondary-glow);
 }
 
 .control-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 /* ── Effect Grid ─────────────────────────────────────────── */
@@ -914,8 +1115,9 @@ html, body {
   border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   font-family: var(--font-ui);
+  letter-spacing: 0.3px;
   transition: all var(--duration) var(--ease);
   text-transform: uppercase;
   text-align: center;
@@ -926,19 +1128,24 @@ html, body {
   border-color: var(--border-hover);
   color: var(--text-secondary);
   background: var(--surface-3);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
 }
 
 .effect-btn-active {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent);
-  box-shadow: 0 0 6px var(--accent-glow);
+  box-shadow: 0 0 16px var(--accent-glow), 0 0 32px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transform: translateY(0);
 }
 
 .effect-btn-active:hover {
   background: var(--accent-dim);
   border-color: var(--accent-hover);
   color: var(--accent-hover);
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
 }
 
 .effect-description {
@@ -953,14 +1160,16 @@ html, body {
 
 kbd {
   display: inline-block;
-  padding: 0 4px;
+  padding: 1px 6px;
   font-family: var(--font-mono);
   font-size: 9px;
-  color: var(--text-dim);
-  background: var(--surface-2);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--surface-3);
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: 4px;
   line-height: 1.6;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
 
 /* ── Animations ──────────────────────────────────────────── */
@@ -970,16 +1179,63 @@ kbd {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.control-section:first-child {
-  animation: fadeIn 0.2s var(--ease);
+.control-section {
+  animation: fadeIn 0.3s var(--ease) both;
 }
+
+.control-section:nth-child(2) { animation-delay: 0.04s; }
+.control-section:nth-child(3) { animation-delay: 0.08s; }
+.control-section:nth-child(4) { animation-delay: 0.12s; }
+.control-section:nth-child(5) { animation-delay: 0.16s; }
+.control-section:nth-child(6) { animation-delay: 0.20s; }
+.control-section:nth-child(7) { animation-delay: 0.24s; }
+.control-section:nth-child(8) { animation-delay: 0.28s; }
+.control-section:nth-child(9) { animation-delay: 0.32s; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.5; }
 }
 
-.status-exporting {
-  color: var(--accent);
-  animation: pulse 1.2s ease-in-out infinite;
+@keyframes statusExportPulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: inset 0 1px 0 rgba(0, 212, 255, 0.05);
+  }
+  50% {
+    opacity: 0.75;
+    box-shadow: inset 0 1px 0 rgba(0, 212, 255, 0.12);
+  }
+}
+
+@keyframes placeholderFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 8px var(--accent-glow); }
+  50%      { box-shadow: 0 0 16px var(--accent-glow), 0 0 24px var(--accent-glow); }
+}
+
+@keyframes camPulse {
+  0%, 100% { box-shadow: 0 0 4px var(--danger); }
+  50%      { box-shadow: 0 0 10px var(--danger), 0 0 16px var(--danger); }
+}
+
+@keyframes dragPulse {
+  0%, 100% { opacity: 0.7; background: var(--accent-glow); }
+  50%      { opacity: 1; background: var(--accent-dim); }
+}
+
+/* ── Reduced Motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

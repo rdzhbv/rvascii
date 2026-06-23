@@ -53,6 +53,16 @@ export function createControlsUI(
     inp.step = String(step)
     inp.value = String(value)
 
+    // Track fill — sync CSS custom property for gradient fill on the slider track
+    const updateTrackFill = () => {
+      const mn = parseFloat(inp.min)
+      const mx = parseFloat(inp.max)
+      const v = parseFloat(inp.value)
+      const pct = ((v - mn) / (mx - mn)) * 100
+      inp.style.setProperty('--track-fill', `${pct}%`)
+    }
+    updateTrackFill()
+
     const valSpan = document.createElement('span')
     valSpan.className = 'control-value'
     valSpan.textContent = rnd(value)
@@ -63,6 +73,7 @@ export function createControlsUI(
       const v = parseFloat(inp.value)
       valSpan.textContent = rnd(v)
       valSpan.dataset.value = String(v)
+      updateTrackFill()
       cb(v)
     })
 
